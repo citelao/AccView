@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "AccView (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "AccView (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
