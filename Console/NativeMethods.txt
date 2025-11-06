@@ -1,3 +1,7 @@
 EnumWindows
 GetWindowTextW
 GetWindowThreadProcessId
+
+CUIAutomation
+IUIAutomation
+CoCreateInstance
