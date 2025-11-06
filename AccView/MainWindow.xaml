@@ -22,12 +22,14 @@
         </Grid.RowDefinitions>
 
         <TreeView x:Name="ElementsTreeView"
-                  ItemsSource="{x:Bind AccessibilityTree}">
+                  ItemsSource="{x:Bind AccessibilityTree}"
+                  Expanding="ElementsTreeView_Expanding">
             <TreeView.ItemTemplate>
+                <!-- TODO: 2-way binding -->
                 <DataTemplate x:DataType="vm:AutomationElementViewModel">
                     <TreeViewItem ItemsSource="{x:Bind Children}">
-                        <StackPanel>
-                            <TextBlock Text="{x:Bind LocalizedControlType}" />
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="{x:Bind LocalizedControlType}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             <TextBlock Text="{x:Bind Name}" />
                         </StackPanel>
                     </TreeViewItem>

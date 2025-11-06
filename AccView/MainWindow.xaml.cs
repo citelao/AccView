@@ -49,5 +49,26 @@ namespace AccView
                 AccessibilityTree.Add(vm);
             }
         }
+
+        private void ElementsTreeView_Expanding(TreeView sender, TreeViewExpandingEventArgs args)
+        {
+            var expandingItem = args.Item as AutomationElementViewModel;
+            if (expandingItem == null)
+            {
+                throw new InvalidOperationException("Expanding item is not an AutomationElementViewModel.");
+            }
+
+            // Load all children, then load their children as well (so that the expander shows up)
+            if (expandingItem.Children == null)
+            {
+                expandingItem.LoadChildren();
+
+            }
+
+            foreach (var child in expandingItem.Children ?? [])
+            {
+                child.LoadChildren();
+            }
+        }
     }
 }
