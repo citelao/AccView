@@ -22,5 +22,10 @@ namespace AccView
             // TODO: notify property changed?
             ViewModel = elementViewModel;
         }
+
+        private void InvokeButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            ViewModel.Invoke();
+        }
     }
 }

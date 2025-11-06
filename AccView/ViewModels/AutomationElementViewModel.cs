@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -26,7 +27,48 @@ namespace AccView.ViewModels
         private readonly IUIAutomation _uia;
         private IUIAutomationElement _element;
 
-        // https://learn.microsoft.com/en-us/windows/win32/winauto/uiauto-control-pattern-availability-propids
+        /// <summary>
+        /// Properties for checking pattern availability
+        /// https://learn.microsoft.com/en-us/windows/win32/winauto/uiauto-control-pattern-availability-propids
+        /// </summary>
+        public static readonly List<UIA_PROPERTY_ID> AvaiblePatternProperties = [
+            UIA_PROPERTY_ID.UIA_IsDockPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsExpandCollapsePatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsGridItemPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsGridPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsInvokePatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsMultipleViewPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsRangeValuePatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsScrollPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsScrollItemPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsSelectionItemPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsSelectionPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsTablePatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsTableItemPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsTextPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsTogglePatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsTransformPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsValuePatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsWindowPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsLegacyIAccessiblePatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsItemContainerPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsVirtualizedItemPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsSynchronizedInputPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsObjectModelPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsAnnotationPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsTextPattern2AvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsStylesPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsSpreadsheetPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsSpreadsheetItemPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsTransformPattern2AvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsTextChildPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsDragPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsDropTargetPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsTextEditPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsCustomNavigationPatternAvailablePropertyId,
+            UIA_PROPERTY_ID.UIA_IsSelectionPattern2AvailablePropertyId,
+        ];
+
         public static readonly List<UIA_PROPERTY_ID> DefaultCachedProperties = [
             // name
             UIA_PROPERTY_ID.UIA_NamePropertyId,
@@ -94,6 +136,15 @@ namespace AccView.ViewModels
         public void LoadDetailedProperties()
         {
             var cache = _uia.CreateCacheRequest();
+            foreach (var propertyId in AvaiblePatternProperties)
+            {
+                cache.AddProperty(propertyId);
+            }
+            foreach (var knownPattern in KnownPattern.All.Values)
+            {
+                cache.AddProperty(knownPattern.IsAvailableId);
+                cache.AddPattern(knownPattern.PatternId);
+            }
             foreach (var propertyId in DefaultCachedProperties)
             {
                 cache.AddProperty(propertyId);
@@ -104,6 +155,25 @@ namespace AccView.ViewModels
             }
 
             _element = _element.BuildUpdatedCache(cache);
+        }
+
+        public bool IsPatternAvailable(KnownPattern pattern)
+        {
+            return pattern.CachedIsAvailable(_element);
+        }
+
+        // TODO: play with this.
+        public void Invoke()
+        {
+            var invoke = KnownPattern.All[UIA_PATTERN_ID.UIA_InvokePatternId];
+            if (!IsPatternAvailable(invoke))
+            {
+                throw new InvalidOperationException("Invoke pattern is not available on this element.");
+            }
+
+            // TODO: use type introspection?
+            var pattern = (IUIAutomationInvokePattern)invoke.CachedGetRaw(_element);
+            pattern.Invoke();
         }
     }
 }

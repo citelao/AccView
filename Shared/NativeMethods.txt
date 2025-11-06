@@ -2,4 +2,9 @@ CUIAutomation
 IUIAutomation
 CoCreateInstance
 
+IUIAutomationExpandCollapsePattern
+IUIAutomationInvokePattern
+IUIAutomationTextPattern
+IUIAutomationValuePattern
+
 GetCursorPos

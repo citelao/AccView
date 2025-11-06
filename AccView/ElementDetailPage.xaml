@@ -37,7 +37,12 @@
             <TextBlock Grid.Row="3" Grid.Column="0">ControlType</TextBlock>
             <TextBlock Grid.Row="3" Grid.Column="1" Text="{x:Bind ViewModel.ControlType, Mode=OneWay}" />
         </Grid>
-        
+
+        <Button
+            x:Name="InvokeButton"
+            IsEnabled="{x:Bind ViewModel.IsEnabled, Mode=OneWay}"
+            Click="InvokeButton_Click">Invoke</Button>
+
     </StackPanel>
 </Page>
 
