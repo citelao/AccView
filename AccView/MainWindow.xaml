@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:AccView"
+    xmlns:vm="using:AccView.ViewModels"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -21,10 +22,15 @@
         </Grid.RowDefinitions>
 
         <TreeView x:Name="ElementsTreeView"
-                  ItemsSource="{x:Bind TreeViewItems}">
+                  ItemsSource="{x:Bind AccessibilityTree}">
             <TreeView.ItemTemplate>
-                <DataTemplate x:DataType="TreeViewNode">
-                    <TreeViewItem ItemsSource="{x:Bind Children}" Content="{x:Bind Content}" />
+                <DataTemplate x:DataType="vm:AutomationElementViewModel">
+                    <TreeViewItem ItemsSource="{x:Bind Children}">
+                        <StackPanel>
+                            <TextBlock Text="{x:Bind LocalizedControlType}" />
+                            <TextBlock Text="{x:Bind Name}" />
+                        </StackPanel>
+                    </TreeViewItem>
                 </DataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>

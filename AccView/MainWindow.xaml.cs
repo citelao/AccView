@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
+using AccView.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -12,6 +7,12 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Shared;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 
@@ -25,7 +26,7 @@ namespace AccView
     /// </summary>
     public sealed partial class MainWindow : Window
     {
-        public ObservableCollection<TreeViewNode> TreeViewItems= new();
+        public ObservableCollection<AutomationElementViewModel> AccessibilityTree = new();
 
         public MainWindow()
         {
@@ -42,32 +43,10 @@ namespace AccView
             for (int i = 0; i < children.Length; i++)
             {
                 var element = children.GetElement(i);
-                var name = (string)element.GetCurrentPropertyValue(Windows.Win32.UI.Accessibility.UIA_PROPERTY_ID.UIA_NamePropertyId);
-                var automationId = (string)element.GetCurrentPropertyValue(Windows.Win32.UI.Accessibility.UIA_PROPERTY_ID.UIA_AutomationIdPropertyId);
-                // Check to see if this element has children
-                var childCondition = uia.CreateTrueCondition();
-                var childElements = element.FindFirst(Windows.Win32.UI.Accessibility.TreeScope.TreeScope_Children, childCondition);
-                var hasChildren = childElements != null;
-                OutputTextBlock.Text += $"{i}: Name='{name}', AutomationId='{automationId}'\r\n";
+                var vm = new AutomationElementViewModel(uia, element);
+                vm.LoadChildren();
 
-                var nodeName = (string.IsNullOrEmpty(automationId))
-                    ? name
-                    : $"{name} ({automationId})";
-                var node = new TreeViewNode()
-                {
-                    Content = nodeName,
-                };
-
-                if (hasChildren)
-                {
-                    OutputTextBlock.Text += "   + [...]\r\n";
-                    node.Children.Add(new TreeViewNode()
-                    {
-                        Content = "..."
-                    });
-                }
-
-                TreeViewItems.Add(node);
+                AccessibilityTree.Add(vm);
             }
         }
     }
