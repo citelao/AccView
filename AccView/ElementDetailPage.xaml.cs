@@ -17,6 +17,7 @@ namespace AccView
         {
             base.OnNavigatedTo(e);
             var elementViewModel = e.Parameter as ViewModels.AutomationElementViewModel;
+            elementViewModel?.LoadDetailedProperties();
 
             // TODO: notify property changed?
             ViewModel = elementViewModel;

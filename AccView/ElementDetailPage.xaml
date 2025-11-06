@@ -12,5 +12,10 @@
         <TextBlock Text="{x:Bind ViewModel.Name, Mode=OneWay}" Style="{StaticResource TitleTextBlockStyle}" MaxLines="1" />
         <TextBlock Text="{x:Bind ViewModel.LocalizedControlType, Mode=OneWay}" />
         <TextBlock Text="{x:Bind ViewModel.BoundingRect, Mode=OneWay}" />
+        <TextBlock Text="{x:Bind ViewModel.IsEnabled, Mode=OneWay}" />
+        <TextBlock Text="{x:Bind ViewModel.IsOffscreen, Mode=OneWay}" />
+        <TextBlock Text="{x:Bind ViewModel.HasKeyboardFocus, Mode=OneWay}" />
+        <TextBlock Text="{x:Bind ViewModel.ControlType, Mode=OneWay}" />
+        
     </StackPanel>
 </Page>
