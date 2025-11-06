@@ -15,19 +15,26 @@
 
     <Grid
         Loaded="Grid_Loaded">
-        <TextBox
-            x:Name="OutputTextBlock"
-            AcceptsReturn="True"
-            VerticalAlignment="Stretch"
-            HorizontalAlignment="Stretch"
-            Margin="8" />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" /> <!-- Tree -->
+            <RowDefinition Height="Auto" /> <!-- Log -->
+        </Grid.RowDefinitions>
 
-        <TreeView x:Name="ElementsTreeView" ItemsSource="{x:Bind TreeViewItems}">
+        <TreeView x:Name="ElementsTreeView"
+                  ItemsSource="{x:Bind TreeViewItems}">
             <TreeView.ItemTemplate>
                 <DataTemplate x:DataType="TreeViewNode">
                     <TreeViewItem ItemsSource="{x:Bind Children}" Content="{x:Bind Content}" />
                 </DataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>
+
+        <TextBox
+            Grid.Row="1"
+            x:Name="OutputTextBlock"
+            AcceptsReturn="True"
+            VerticalAlignment="Stretch"
+            HorizontalAlignment="Stretch"
+            Margin="8" />
     </Grid>
 </Window>

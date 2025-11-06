@@ -50,9 +50,12 @@ namespace AccView
                 var hasChildren = childElements != null;
                 OutputTextBlock.Text += $"{i}: Name='{name}', AutomationId='{automationId}'\r\n";
 
+                var nodeName = (string.IsNullOrEmpty(automationId))
+                    ? name
+                    : $"{name} ({automationId})";
                 var node = new TreeViewNode()
                 {
-                    Content = $"{name} ({automationId})",
+                    Content = nodeName,
                 };
 
                 if (hasChildren)
