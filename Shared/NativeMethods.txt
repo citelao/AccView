@@ -1,3 +1,5 @@
 CUIAutomation
 IUIAutomation
 CoCreateInstance
+
+GetCursorPos
