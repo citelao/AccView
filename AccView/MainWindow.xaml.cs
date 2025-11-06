@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -24,6 +25,8 @@ namespace AccView
     /// </summary>
     public sealed partial class MainWindow : Window
     {
+        public ObservableCollection<TreeViewNode> TreeViewItems= new();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -46,10 +49,22 @@ namespace AccView
                 var childElements = element.FindFirst(Windows.Win32.UI.Accessibility.TreeScope.TreeScope_Children, childCondition);
                 var hasChildren = childElements != null;
                 OutputTextBlock.Text += $"{i}: Name='{name}', AutomationId='{automationId}'\r\n";
+
+                var node = new TreeViewNode()
+                {
+                    Content = $"{name} ({automationId})",
+                };
+
                 if (hasChildren)
                 {
                     OutputTextBlock.Text += "   + [...]\r\n";
+                    node.Children.Add(new TreeViewNode()
+                    {
+                        Content = "..."
+                    });
                 }
+
+                TreeViewItems.Add(node);
             }
         }
     }

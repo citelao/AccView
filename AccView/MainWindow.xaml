@@ -21,5 +21,13 @@
             VerticalAlignment="Stretch"
             HorizontalAlignment="Stretch"
             Margin="8" />
+
+        <TreeView x:Name="ElementsTreeView" ItemsSource="{x:Bind TreeViewItems}">
+            <TreeView.ItemTemplate>
+                <DataTemplate x:DataType="TreeViewNode">
+                    <TreeViewItem ItemsSource="{x:Bind Children}" Content="{x:Bind Content}" />
+                </DataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
     </Grid>
 </Window>
