@@ -1,10 +1,5 @@
-﻿using System;
-using System.Text;
-using Windows.Win32;
-using Windows.Win32.Foundation;
-using Windows.Win32.UI.WindowsAndMessaging;
-
-using Windows.Win32.UI.Accessibility;
+﻿using Windows.Win32.UI.Accessibility;
+using Shared;
 
 //unsafe
 //{
@@ -12,7 +7,7 @@ using Windows.Win32.UI.Accessibility;
 //    {
 //        const int maxLength = 256;
 //        Span<char> buffer = stackalloc char[maxLength];
-            
+
 //        fixed (char* pBuffer = buffer)
 //        {
 //            var pwstr = new PWSTR(pBuffer);
@@ -26,7 +21,7 @@ using Windows.Win32.UI.Accessibility;
 //}
 
 // List all top-level windows with their titles
-var automation = CreateUIAutomationInstance();
+var automation = UIAHelpers.CreateUIAutomationInstance();
 var root = automation.GetRootElement();
 var condition = automation.CreateTrueCondition();
 var children = root.FindAll(TreeScope.TreeScope_Children, condition);
@@ -47,21 +42,4 @@ for (int i = 0; i < children.Length; i++)
         Console.WriteLine("   + [...]");
     }
 
-}
-
-static IUIAutomation CreateUIAutomationInstance()
-{
-    // https://learn.microsoft.com/en-us/windows/win32/winauto/uiauto-creatingcuiautomation
-    IUIAutomation? automation = null;
-    PInvoke.CoCreateInstance<IUIAutomation>(
-        typeof(CUIAutomation).GUID,
-        null,
-        Windows.Win32.System.Com.CLSCTX.CLSCTX_INPROC_SERVER,
-        out automation);
-    if (automation == null)
-    {
-        throw new InvalidOperationException("Failed to create IUIAutomation instance.");
-    }
-
-    return automation;
 }

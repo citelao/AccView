@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccView", "AccView\AccView.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Console", "Console\Console.csproj", "{E23D81DA-9382-422E-BA64-AF380317CA38}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{886D71FB-FAED-458D-BDB7-E9F846B36A47}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM64 = Debug|ARM64
@@ -47,6 +49,18 @@ Global
 		{E23D81DA-9382-422E-BA64-AF380317CA38}.Release|x64.Build.0 = Release|Any CPU
 		{E23D81DA-9382-422E-BA64-AF380317CA38}.Release|x86.ActiveCfg = Release|Any CPU
 		{E23D81DA-9382-422E-BA64-AF380317CA38}.Release|x86.Build.0 = Release|Any CPU
+		{886D71FB-FAED-458D-BDB7-E9F846B36A47}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{886D71FB-FAED-458D-BDB7-E9F846B36A47}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{886D71FB-FAED-458D-BDB7-E9F846B36A47}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{886D71FB-FAED-458D-BDB7-E9F846B36A47}.Debug|x64.Build.0 = Debug|Any CPU
+		{886D71FB-FAED-458D-BDB7-E9F846B36A47}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{886D71FB-FAED-458D-BDB7-E9F846B36A47}.Debug|x86.Build.0 = Debug|Any CPU
+		{886D71FB-FAED-458D-BDB7-E9F846B36A47}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{886D71FB-FAED-458D-BDB7-E9F846B36A47}.Release|ARM64.Build.0 = Release|Any CPU
+		{886D71FB-FAED-458D-BDB7-E9F846B36A47}.Release|x64.ActiveCfg = Release|Any CPU
+		{886D71FB-FAED-458D-BDB7-E9F846B36A47}.Release|x64.Build.0 = Release|Any CPU
+		{886D71FB-FAED-458D-BDB7-E9F846B36A47}.Release|x86.ActiveCfg = Release|Any CPU
+		{886D71FB-FAED-458D-BDB7-E9F846B36A47}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

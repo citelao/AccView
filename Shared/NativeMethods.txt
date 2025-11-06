@@ -1,0 +1,3 @@
+CUIAutomation
+IUIAutomation
+CoCreateInstance
