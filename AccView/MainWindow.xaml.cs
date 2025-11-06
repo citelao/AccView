@@ -33,7 +33,7 @@ namespace AccView
             InitializeComponent();
         }
 
-        private async void Grid_Loaded(object sender, RoutedEventArgs e)
+        private void Grid_Loaded(object sender, RoutedEventArgs e)
         {
             var uia = UIAHelpers.CreateUIAutomationInstance();
             var root = uia.GetRootElement();
@@ -69,6 +69,12 @@ namespace AccView
             {
                 child.LoadChildren();
             }
+        }
+
+        private void ElementsTreeView_SelectionChanged(TreeView sender, TreeViewSelectionChangedEventArgs args)
+        {
+            var selectedItem = args.AddedItems.FirstOrDefault() as AutomationElementViewModel;
+            ElementDetail.Navigate(typeof(ElementDetailPage), selectedItem);
         }
     }
 }

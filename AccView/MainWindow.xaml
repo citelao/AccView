@@ -15,15 +15,23 @@
     </Window.SystemBackdrop>
 
     <Grid
-        Loaded="Grid_Loaded">
+        Loaded="Grid_Loaded"
+        RowSpacing="4"
+        ColumnSpacing="4">
         <Grid.RowDefinitions>
-            <RowDefinition Height="*" /> <!-- Tree -->
+            <RowDefinition Height="*" /> <!-- Main UI -->
             <RowDefinition Height="Auto" /> <!-- Log -->
         </Grid.RowDefinitions>
+        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*" /> <!-- Tree-->
+            <ColumnDefinition Width="1*" /> <!-- Details -->
+        </Grid.ColumnDefinitions>
 
         <TreeView x:Name="ElementsTreeView"
                   ItemsSource="{x:Bind AccessibilityTree}"
-                  Expanding="ElementsTreeView_Expanding">
+                  Expanding="ElementsTreeView_Expanding"
+                  SelectionChanged="ElementsTreeView_SelectionChanged">
             <TreeView.ItemTemplate>
                 <!-- TODO: 2-way binding -->
                 <DataTemplate x:DataType="vm:AutomationElementViewModel">
@@ -37,8 +45,13 @@
             </TreeView.ItemTemplate>
         </TreeView>
 
+        <Frame x:Name="ElementDetail"
+               Grid.Column="1">
+        </Frame>
+
         <TextBox
             Grid.Row="1"
+            Grid.ColumnSpan="2"
             x:Name="OutputTextBlock"
             AcceptsReturn="True"
             VerticalAlignment="Stretch"
