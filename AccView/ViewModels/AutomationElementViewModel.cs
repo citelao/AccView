@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Drawing;
 using Windows.Win32.UI.Accessibility;
 
 namespace AccView.ViewModels
@@ -7,6 +8,7 @@ namespace AccView.ViewModels
     {
         public string Name { get; private set; }
         public string LocalizedControlType { get; private set; }
+        public Rectangle BoundingRect { get; private set; }
 
         // Must be requested!
         public ObservableCollection<AutomationElementViewModel>? Children { get; private set; } = null;
@@ -22,6 +24,9 @@ namespace AccView.ViewModels
             // TODO: cache
             Name = (string)element.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId);
             LocalizedControlType = (string)element.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId);
+
+            var rect = element.CurrentBoundingRectangle;
+            BoundingRect = new Rectangle(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
         }
 
         public void LoadChildren()

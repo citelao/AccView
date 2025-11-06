@@ -9,7 +9,8 @@
     mc:Ignorable="d">
 
     <StackPanel Spacing="4">
-        <TextBlock Text="{x:Bind ViewModel.Name, Mode=OneWay}" Style="{StaticResource TitleTextBlockStyle}" />
+        <TextBlock Text="{x:Bind ViewModel.Name, Mode=OneWay}" Style="{StaticResource TitleTextBlockStyle}" MaxLines="1" />
         <TextBlock Text="{x:Bind ViewModel.LocalizedControlType, Mode=OneWay}" />
+        <TextBlock Text="{x:Bind ViewModel.BoundingRect, Mode=OneWay}" />
     </StackPanel>
 </Page>
