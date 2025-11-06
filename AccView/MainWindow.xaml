@@ -28,31 +28,38 @@
             <ColumnDefinition Width="1*" /> <!-- Details -->
         </Grid.ColumnDefinitions>
 
-        <StackPanel>
-            <TreeView x:Name="ElementsTreeView"
-                      ItemsSource="{x:Bind AccessibilityTree}"
-                      Expanding="ElementsTreeView_Expanding"
-                      SelectionChanged="ElementsTreeView_SelectionChanged">
-                <TreeView.ItemTemplate>
-                    <!-- TODO: 2-way binding -->
-                    <DataTemplate x:DataType="vm:AutomationElementViewModel">
-                        <TreeViewItem ItemsSource="{x:Bind Children}">
-                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                <TextBlock Text="{x:Bind LocalizedControlType}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                <TextBlock Text="{x:Bind Name}" />
-                            </StackPanel>
-                        </TreeViewItem>
-                    </DataTemplate>
-                </TreeView.ItemTemplate>
-            </TreeView>
+        <ScrollViewer>
+            <StackPanel>
+                <TreeView x:Name="ElementsTreeView"
+                          ItemsSource="{x:Bind AccessibilityTree}"
+                          Expanding="ElementsTreeView_Expanding"
+                          SelectionChanged="ElementsTreeView_SelectionChanged">
+                
+                    <TreeView.Resources>
+                        <ResourceDictionary 
+                           Source="ms-appx:///Microsoft.UI.Xaml/DensityStyles/Compact.xaml"/>
+                    </TreeView.Resources>
+                    <TreeView.ItemTemplate>
+                        <!-- TODO: 2-way binding -->
+                        <DataTemplate x:DataType="vm:AutomationElementViewModel">
+                            <TreeViewItem ItemsSource="{x:Bind Children}">
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <TextBlock Text="{x:Bind LocalizedControlType}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="{x:Bind Name}" />
+                                </StackPanel>
+                            </TreeViewItem>
+                        </DataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
 
-            <Button x:Name="FromCursor" Click="FromCursor_Click">
-                <Button.KeyboardAccelerators>
-                    <KeyboardAccelerator Key="C" Modifiers="Control" />
-                </Button.KeyboardAccelerators>
-                Get from cursor
-            </Button>
-        </StackPanel>
+                <Button x:Name="FromCursor" Click="FromCursor_Click">
+                    <Button.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="C" Modifiers="Control" />
+                    </Button.KeyboardAccelerators>
+                    Get from cursor
+                </Button>
+            </StackPanel>
+        </ScrollViewer>
 
         <Frame x:Name="ElementDetail"
                Grid.Column="1">
