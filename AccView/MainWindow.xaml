@@ -24,7 +24,7 @@
         </Grid.RowDefinitions>
         
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="3*" /> <!-- Tree-->
+            <ColumnDefinition Width="2*" /> <!-- Tree-->
             <ColumnDefinition Width="1*" /> <!-- Details -->
         </Grid.ColumnDefinitions>
 

@@ -12,10 +12,32 @@
         <TextBlock Text="{x:Bind ViewModel.Name, Mode=OneWay}" Style="{StaticResource TitleTextBlockStyle}" MaxLines="1" />
         <TextBlock Text="{x:Bind ViewModel.LocalizedControlType, Mode=OneWay}" />
         <TextBlock Text="{x:Bind ViewModel.BoundingRect, Mode=OneWay}" />
-        <TextBlock Text="{x:Bind ViewModel.IsEnabled, Mode=OneWay}" />
-        <TextBlock Text="{x:Bind ViewModel.IsOffscreen, Mode=OneWay}" />
-        <TextBlock Text="{x:Bind ViewModel.HasKeyboardFocus, Mode=OneWay}" />
-        <TextBlock Text="{x:Bind ViewModel.ControlType, Mode=OneWay}" />
+
+        <Grid RowSpacing="4" ColumnSpacing="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" Grid.Column="0">IsEnabled</TextBlock>
+            <TextBlock Grid.Row="0" Grid.Column="1" Text="{x:Bind ViewModel.IsEnabled, Mode=OneWay}" />
+
+            <TextBlock Grid.Row="1" Grid.Column="0">IsOffscreen</TextBlock>
+            <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind ViewModel.IsOffscreen, Mode=OneWay}" />
+
+            <TextBlock Grid.Row="2" Grid.Column="0">HasKeyboardFocus</TextBlock>
+            <TextBlock Grid.Row="2" Grid.Column="1" Text="{x:Bind ViewModel.HasKeyboardFocus, Mode=OneWay}" />
+
+            <TextBlock Grid.Row="3" Grid.Column="0">ControlType</TextBlock>
+            <TextBlock Grid.Row="3" Grid.Column="1" Text="{x:Bind ViewModel.ControlType, Mode=OneWay}" />
+        </Grid>
         
     </StackPanel>
 </Page>
+

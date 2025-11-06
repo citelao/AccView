@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using Shared;
 using System;
@@ -37,6 +38,8 @@ namespace AccView
         {
             InitializeComponent();
             _uia = UIAHelpers.CreateUIAutomationInstance();
+
+            // TODO: support a different view.
             _trueCondition = _uia.CreateTrueCondition();
         }
 
@@ -78,7 +81,7 @@ namespace AccView
         private void ElementsTreeView_SelectionChanged(TreeView sender, TreeViewSelectionChangedEventArgs args)
         {
             var selectedItem = args.AddedItems.FirstOrDefault() as AutomationElementViewModel;
-            ElementDetail.Navigate(typeof(ElementDetailPage), selectedItem);
+            ElementDetail.Navigate(typeof(ElementDetailPage), selectedItem, new SuppressNavigationTransitionInfo());
         }
 
         private async void FromCursor_Click(object sender, RoutedEventArgs e)
@@ -89,6 +92,7 @@ namespace AccView
             var element = _uia.ElementFromPoint(point);
 
             // Find element's ancestors.
+            // TODO: need to normalize this to match the tree view I'm using.
             var treeWalker = _uia.CreateTreeWalker(_trueCondition);
             var path = new Stack<IUIAutomationElement>();
             var currentElement = element;
