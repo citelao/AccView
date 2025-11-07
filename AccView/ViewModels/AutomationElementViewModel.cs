@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -8,13 +9,20 @@ using Windows.Win32.UI.Accessibility;
 namespace AccView.ViewModels
 {
     [DebuggerDisplay("{Name} (ControlType = {LocalizedControlType})")]
-    public class AutomationElementViewModel
+    [INotifyPropertyChanged]
+    public partial class AutomationElementViewModel
     {
-        public string Name { get; private set; }
-        public string LocalizedControlType { get; private set; }
-        public Rectangle BoundingRect { get; private set; }
+        [ObservableProperty]
+        public partial string Name { get; private set; }
 
-        public string RuntimeId { get; private set; }
+        [ObservableProperty]
+        public partial string LocalizedControlType { get; private set; }
+
+        [ObservableProperty]
+        public partial Rectangle BoundingRect { get; private set; }
+
+        [ObservableProperty]
+        public partial string RuntimeId { get; private set; }
 
         public UIA_CONTROLTYPE_ID ControlType => _element.CachedControlType;
         public bool HasKeyboardFocus => _element.CachedHasKeyboardFocus;
@@ -22,10 +30,17 @@ namespace AccView.ViewModels
         public bool IsOffscreen => _element.CachedIsOffscreen;
 
         // Must be requested!
-        public ObservableCollection<AutomationElementViewModel>? Children { get; private set; } = null;
+        [ObservableProperty]
+        public partial ObservableCollection<AutomationElementViewModel>? Children { get; private set; } = null;
 
         private readonly IUIAutomation _uia;
-        private IUIAutomationElement _element;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ControlType))]
+        [NotifyPropertyChangedFor(nameof(HasKeyboardFocus))]
+        [NotifyPropertyChangedFor(nameof(IsEnabled))]
+        [NotifyPropertyChangedFor(nameof(IsOffscreen))]
+        private partial IUIAutomationElement _element { get; set; }
 
         /// <summary>
         /// Properties for checking pattern availability
@@ -108,7 +123,10 @@ namespace AccView.ViewModels
             var rect = _element.CachedBoundingRectangle;
             BoundingRect = new Rectangle(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
 
+            // TODO: runtimeID
             var runtimeIdObj = _element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
+
+            // TODO: register for change events
         }
 
         public bool IsElement(IUIAutomationElement element)

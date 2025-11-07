@@ -43,12 +43,11 @@
                            Source="ms-appx:///Microsoft.UI.Xaml/DensityStyles/Compact.xaml"/>
                     </TreeView.Resources>
                     <TreeView.ItemTemplate>
-                        <!-- TODO: 2-way binding -->
                         <DataTemplate x:DataType="vm:AutomationElementViewModel">
-                            <TreeViewItem ItemsSource="{x:Bind Children}">
+                            <TreeViewItem ItemsSource="{x:Bind Children, Mode=OneWay}">
                                 <StackPanel Orientation="Horizontal" Spacing="4">
-                                    <TextBlock Text="{x:Bind LocalizedControlType}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                    <TextBlock Text="{x:Bind Name}" />
+                                    <TextBlock Text="{x:Bind LocalizedControlType, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="{x:Bind Name, Mode=OneWay}" />
                                 </StackPanel>
                             </TreeViewItem>
                         </DataTemplate>
