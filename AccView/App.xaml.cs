@@ -27,6 +27,7 @@ namespace AccView
     public partial class App : Application
     {
         private Window? _window;
+        private OverlayWindow? _overlayWindow;
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -45,6 +46,9 @@ namespace AccView
         {
             _window = new MainWindow();
             _window.Activate();
+
+            _overlayWindow = new OverlayWindow();
+            _overlayWindow.Activate();
         }
     }
 }
