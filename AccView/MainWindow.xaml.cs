@@ -28,13 +28,18 @@ namespace AccView
         private IUIAutomation _uia;
         private readonly IUIAutomationCondition _trueCondition;
 
-        public MainWindow()
+        public delegate void MoveOutlineDelegate(Rect rect);
+        private MoveOutlineDelegate? _moveOutlineFunc;
+
+        public MainWindow(MoveOutlineDelegate? func)
         {
             InitializeComponent();
             _uia = UIAHelpers.CreateUIAutomationInstance();
 
             // TODO: support a different view.
             _trueCondition = _uia.CreateTrueCondition();
+
+            _moveOutlineFunc = func;
         }
 
         private void Grid_Loaded(object sender, RoutedEventArgs e)
@@ -149,6 +154,17 @@ namespace AccView
             //ElementsTreeView.Expand(node);
 
             ElementDetail.Navigate(typeof(ElementDetailPage), currentViewModel);
+        }
+
+        private void TreeViewItem_PointerEntered(object sender, PointerRoutedEventArgs e)
+        {
+            var item = sender as TreeViewItem;
+            var vm = ElementsTreeView.ItemFromContainer(item) as AutomationElementViewModel;
+            if (_moveOutlineFunc != null)
+            {
+                var rect = RectHelper.FromCoordinatesAndDimensions(vm.BoundingRect.X, vm.BoundingRect.Y, vm.BoundingRect.Width, vm.BoundingRect.Height);
+                _moveOutlineFunc(rect);
+            }
         }
     }
 }

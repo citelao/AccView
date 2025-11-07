@@ -44,7 +44,7 @@
                     </TreeView.Resources>
                     <TreeView.ItemTemplate>
                         <DataTemplate x:DataType="vm:AutomationElementViewModel">
-                            <TreeViewItem ItemsSource="{x:Bind Children, Mode=OneWay}">
+                            <TreeViewItem ItemsSource="{x:Bind Children, Mode=OneWay}" PointerEntered="TreeViewItem_PointerEntered">
                                 <StackPanel Orientation="Horizontal" Spacing="4">
                                     <TextBlock Text="{x:Bind LocalizedControlType, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                     <TextBlock Text="{x:Bind Name, Mode=OneWay}" />

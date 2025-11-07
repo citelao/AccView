@@ -12,7 +12,7 @@ public sealed partial class OverlayWindow : WinUIEx.WindowEx
         InitializeComponent();
 
         this.IsTitleBarVisible = false;
-        this.SetRegion(Region.CreateRectangle(new Rect(0, 0, 100, 100)));
+        MoveFocusRing(new Rect(0, 0, 100, 100));
 
         // Make the window full-screen on the primary monitor.
         // TODO: handle other screens
@@ -21,6 +21,10 @@ public sealed partial class OverlayWindow : WinUIEx.WindowEx
         //var monitors = MonitorInfo.GetDisplayMonitors();
         //var primaryMonitor = monitors.First(m => m.IsPrimary);
         //this.MoveAndResize(primaryMonitor.RectMonitor.X, primaryMonitor.RectMonitor.Y, primaryMonitor.RectMonitor.Width, primaryMonitor.RectMonitor.Height);
+    }
 
+    public void MoveFocusRing(Rect region)
+    {
+        this.SetRegion(Region.CreateRectangle(region));
     }
 }
