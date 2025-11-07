@@ -23,8 +23,8 @@ public sealed partial class OverlayWindow : WinUIEx.WindowEx
         //this.MoveAndResize(primaryMonitor.RectMonitor.X, primaryMonitor.RectMonitor.Y, primaryMonitor.RectMonitor.Width, primaryMonitor.RectMonitor.Height);
     }
 
-    public void MoveFocusRing(Rect region)
+    public void MoveFocusRing(Rect regionInDps)
     {
-        this.SetRegion(Region.CreateRectangle(region));
+        this.SetRegion(Region.CreateRectangle(regionInDps));
     }
 }

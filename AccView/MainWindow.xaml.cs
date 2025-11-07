@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Win32.UI.Accessibility;
+using WinUIEx;
 
 namespace AccView
 {
@@ -162,9 +163,19 @@ namespace AccView
             var vm = ElementsTreeView.ItemFromContainer(item) as AutomationElementViewModel;
             if (_moveOutlineFunc != null)
             {
-                var rect = RectHelper.FromCoordinatesAndDimensions(vm.BoundingRect.X, vm.BoundingRect.Y, vm.BoundingRect.Width, vm.BoundingRect.Height);
+                var rect = RectHelper.FromCoordinatesAndDimensions(
+                    (float)ToDp(vm.BoundingRect.X),
+                    (float)ToDp(vm.BoundingRect.Y),
+                    (float)ToDp(vm.BoundingRect.Width),
+                    (float)ToDp(vm.BoundingRect.Height));
                 _moveOutlineFunc(rect);
             }
+        }
+
+        private double ToDp(double pixels)
+        {
+            var dpi = this.GetDpiForWindow();
+            return (pixels * 96 / dpi);
         }
     }
 }
