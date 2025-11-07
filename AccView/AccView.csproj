@@ -16,6 +16,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="ElementDetailPage.xaml" />
+    <None Remove="OverlayWindow.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -48,6 +49,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Shared\Shared.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="OverlayWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="ElementDetailPage.xaml">
