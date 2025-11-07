@@ -13,7 +13,7 @@
     IsShownInSwitchers="False">
 
     <winex:WindowEx.SystemBackdrop>
-        <winex:TransparentTintBackdrop TintColor="Red" />
+        <winex:TransparentTintBackdrop TintColor="#66ff0066" />
     </winex:WindowEx.SystemBackdrop>
 
     <Grid>

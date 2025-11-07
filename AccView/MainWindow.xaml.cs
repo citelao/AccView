@@ -164,18 +164,12 @@ namespace AccView
             if (_moveOutlineFunc != null)
             {
                 var rect = RectHelper.FromCoordinatesAndDimensions(
-                    (float)ToDp(vm.BoundingRect.X),
-                    (float)ToDp(vm.BoundingRect.Y),
-                    (float)ToDp(vm.BoundingRect.Width),
-                    (float)ToDp(vm.BoundingRect.Height));
+                    (float)vm.BoundingRect.X,
+                    (float)vm.BoundingRect.Y,
+                    (float)vm.BoundingRect.Width,
+                    (float)vm.BoundingRect.Height);
                 _moveOutlineFunc(rect);
             }
-        }
-
-        private double ToDp(double pixels)
-        {
-            var dpi = this.GetDpiForWindow();
-            return (pixels * 96 / dpi);
         }
     }
 }
