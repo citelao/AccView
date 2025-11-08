@@ -16,8 +16,16 @@
         <winex:TransparentTintBackdrop TintColor="Transparent" />
     </winex:WindowEx.SystemBackdrop>
 
-    <Grid>
-        <TextBlock>This is an overlay</TextBlock>
-        <Border Height="400" Width="500" Background="Red"></Border>
-    </Grid>
+    <Canvas>
+        <Border
+            x:Name="ItemBorder"
+            Canvas.Left="4"
+            Canvas.Top="50"
+            Height="40"
+            Width="50"
+            BorderBrush="Red"
+            BorderThickness="4"
+            CornerRadius="4"
+            Margin="-4"></Border>
+    </Canvas>
 </winex:WindowEx>
