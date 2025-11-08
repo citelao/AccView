@@ -20,28 +20,29 @@ public sealed partial class OverlayWindow : WinUIEx.WindowEx
         this.SetExtendedWindowStyle(ExtendedWindowStyle.Transparent | ExtendedWindowStyle.NoActivate | ExtendedWindowStyle.TopMost | ExtendedWindowStyle.Layered);
         MoveFocusRing(new Rect(0, 0, 100, 100));
 
-        _messageMonitor = new WindowMessageMonitor(this.GetWindowHandle());
-        _messageMonitor.WindowMessageReceived += MessageMonitor_WindowMessageReceived;
+        //_messageMonitor = new WindowMessageMonitor(this.GetWindowHandle());
+        //_messageMonitor.WindowMessageReceived += MessageMonitor_WindowMessageReceived;
 
         // Make the window full-screen on the primary monitor.
         // TODO: handle other screens
         // TODO: handle window changes
+        // TODO: draw over the Taskbar.
         this.Maximize();
         //var monitors = MonitorInfo.GetDisplayMonitors();
         //var primaryMonitor = monitors.First(m => m.IsPrimary);
         //this.MoveAndResize(primaryMonitor.RectMonitor.X, primaryMonitor.RectMonitor.Y, primaryMonitor.RectMonitor.Width, primaryMonitor.RectMonitor.Height);
     }
 
-    private void MessageMonitor_WindowMessageReceived(object? sender, WindowMessageEventArgs e)
-    {
-        var WM_NCHITTEST = 0x0084;
-        if (e.Message.MessageId == WM_NCHITTEST)
-        {
-            e.Handled = true;
-            var HTNOWHERE = 0;
-            e.Result = HTNOWHERE;
-        }
-    }
+    //private void MessageMonitor_WindowMessageReceived(object? sender, WindowMessageEventArgs e)
+    //{
+    //    var WM_NCHITTEST = 0x0084;
+    //    if (e.Message.MessageId == WM_NCHITTEST)
+    //    {
+    //        e.Handled = true;
+    //        var HTNOWHERE = 0;
+    //        e.Result = HTNOWHERE;
+    //    }
+    //}
 
     public void MoveFocusRing(Rect regionInPhysicalPixels)
     {

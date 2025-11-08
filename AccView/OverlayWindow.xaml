@@ -23,7 +23,7 @@
             Canvas.Top="50"
             Height="40"
             Width="50"
-            BorderBrush="Red"
+            BorderBrush="#bbff00ff"
             BorderThickness="4"
             CornerRadius="4"
             Margin="-4"></Border>
