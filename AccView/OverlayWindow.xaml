@@ -13,10 +13,11 @@
     IsShownInSwitchers="False">
 
     <winex:WindowEx.SystemBackdrop>
-        <winex:TransparentTintBackdrop TintColor="#66ff0066" />
+        <winex:TransparentTintBackdrop TintColor="Transparent" />
     </winex:WindowEx.SystemBackdrop>
 
     <Grid>
         <TextBlock>This is an overlay</TextBlock>
+        <Border Height="400" Width="500" Background="Red"></Border>
     </Grid>
 </winex:WindowEx>
