@@ -25,7 +25,7 @@ namespace AccView.ViewModels
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(RuntimeIdString))]
         public partial RuntimeIdT RuntimeId { get; private set; }
-        public string RuntimeIdString => string.Join(",", RuntimeId);
+        public string RuntimeIdString => $"[{string.Join(",", RuntimeId)}]";
 
         public UIA_CONTROLTYPE_ID ControlType => _element.CachedControlType;
         public bool HasKeyboardFocus => _element.CachedHasKeyboardFocus;
@@ -46,6 +46,7 @@ namespace AccView.ViewModels
         [NotifyPropertyChangedFor(nameof(HasKeyboardFocus))]
         [NotifyPropertyChangedFor(nameof(IsEnabled))]
         [NotifyPropertyChangedFor(nameof(IsOffscreen))]
+        [NotifyPropertyChangedFor(nameof(IsInvokePatternAvailable))]
         private partial IUIAutomationElement _element { get; set; }
 
         /// <summary>
@@ -188,6 +189,8 @@ namespace AccView.ViewModels
             return pattern.CachedIsAvailable(_element);
         }
 
+        public bool IsInvokePatternAvailable => IsPatternAvailable(KnownPattern.All[UIA_PATTERN_ID.UIA_InvokePatternId]);
+            
         // TODO: play with this.
         public void Invoke()
         {

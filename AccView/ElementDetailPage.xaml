@@ -11,6 +11,7 @@
     <StackPanel Spacing="4">
         <TextBlock Text="{x:Bind ViewModel.Name, Mode=OneWay}" Style="{StaticResource TitleTextBlockStyle}" MaxLines="1" />
         <TextBlock Text="{x:Bind ViewModel.LocalizedControlType, Mode=OneWay}" />
+        <TextBlock Text="{x:Bind ViewModel.RuntimeIdString, Mode=OneWay}" />
         <TextBlock Text="{x:Bind ViewModel.BoundingRect, Mode=OneWay}" />
 
         <Grid RowSpacing="4" ColumnSpacing="4">
@@ -40,7 +41,7 @@
 
         <Button
             x:Name="InvokeButton"
-            IsEnabled="{x:Bind ViewModel.IsEnabled, Mode=OneWay}"
+            IsEnabled="{x:Bind ViewModel.IsInvokePatternAvailable, Mode=OneWay}"
             Click="InvokeButton_Click">Invoke</Button>
 
     </StackPanel>
