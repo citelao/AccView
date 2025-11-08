@@ -10,8 +10,6 @@ namespace AccView;
 
 public sealed partial class OverlayWindow : WinUIEx.WindowEx
 {
-    private WindowMessageMonitor _messageMonitor;
-
     public OverlayWindow()
     {
         InitializeComponent();
@@ -19,9 +17,6 @@ public sealed partial class OverlayWindow : WinUIEx.WindowEx
         this.IsTitleBarVisible = false;
         this.SetExtendedWindowStyle(ExtendedWindowStyle.Transparent | ExtendedWindowStyle.NoActivate | ExtendedWindowStyle.TopMost | ExtendedWindowStyle.Layered);
         MoveFocusRing(new Rect(0, 0, 100, 100));
-
-        //_messageMonitor = new WindowMessageMonitor(this.GetWindowHandle());
-        //_messageMonitor.WindowMessageReceived += MessageMonitor_WindowMessageReceived;
 
         // Make the window full-screen on the primary monitor.
         // TODO: handle other screens
@@ -32,17 +27,6 @@ public sealed partial class OverlayWindow : WinUIEx.WindowEx
         //var primaryMonitor = monitors.First(m => m.IsPrimary);
         //this.MoveAndResize(primaryMonitor.RectMonitor.X, primaryMonitor.RectMonitor.Y, primaryMonitor.RectMonitor.Width, primaryMonitor.RectMonitor.Height);
     }
-
-    //private void MessageMonitor_WindowMessageReceived(object? sender, WindowMessageEventArgs e)
-    //{
-    //    var WM_NCHITTEST = 0x0084;
-    //    if (e.Message.MessageId == WM_NCHITTEST)
-    //    {
-    //        e.Handled = true;
-    //        var HTNOWHERE = 0;
-    //        e.Result = HTNOWHERE;
-    //    }
-    //}
 
     public void MoveFocusRing(Rect regionInPhysicalPixels)
     {

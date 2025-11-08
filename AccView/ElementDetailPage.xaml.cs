@@ -25,7 +25,7 @@ namespace AccView
 
         private void InvokeButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            ViewModel.Invoke();
+            ViewModel!.Invoke();
         }
     }
 }

@@ -17,6 +17,7 @@
     </winex:WindowEx.SystemBackdrop>
 
     <Canvas>
+        <!-- TODO: better color -->
         <Border
             x:Name="ItemBorder"
             Canvas.Left="4"

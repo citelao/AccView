@@ -50,7 +50,7 @@ namespace AccView
             for (int i = 0; i < children.Length; i++)
             {
                 var element = children.GetElement(i);
-                var vm = new AutomationElementViewModel(_uia, element);
+                var vm = new AutomationElementViewModel(_uia, element, parent: null);
                 vm.LoadChildren();
 
                 AccessibilityTree.Add(vm);
@@ -157,6 +157,7 @@ namespace AccView
             ElementDetail.Navigate(typeof(ElementDetailPage), currentViewModel);
         }
 
+        // TODO: move highlight on focus, too.
         private void TreeViewItem_PointerEntered(object sender, PointerRoutedEventArgs e)
         {
             var item = sender as TreeViewItem;
@@ -164,10 +165,10 @@ namespace AccView
             if (_moveOutlineFunc != null)
             {
                 var rect = RectHelper.FromCoordinatesAndDimensions(
-                    (float)vm.BoundingRect.X,
-                    (float)vm.BoundingRect.Y,
-                    (float)vm.BoundingRect.Width,
-                    (float)vm.BoundingRect.Height);
+                    (float)vm!.BoundingRect.X,
+                    (float)vm!.BoundingRect.Y,
+                    (float)vm!.BoundingRect.Width,
+                    (float)vm!.BoundingRect.Height);
                 _moveOutlineFunc(rect);
             }
         }

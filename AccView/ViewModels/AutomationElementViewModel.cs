@@ -8,9 +8,10 @@ using Windows.Win32.UI.Accessibility;
 
 namespace AccView.ViewModels
 {
+    using RuntimeIdT = int[];
+
     [DebuggerDisplay("{Name} (ControlType = {LocalizedControlType})")]
-    [INotifyPropertyChanged]
-    public partial class AutomationElementViewModel
+    public partial class AutomationElementViewModel : ObservableObject
     {
         [ObservableProperty]
         public partial string Name { get; private set; }
@@ -22,7 +23,9 @@ namespace AccView.ViewModels
         public partial Rectangle BoundingRect { get; private set; }
 
         [ObservableProperty]
-        public partial string RuntimeId { get; private set; }
+        [NotifyPropertyChangedFor(nameof(RuntimeIdString))]
+        public partial RuntimeIdT RuntimeId { get; private set; }
+        public string RuntimeIdString => string.Join(",", RuntimeId);
 
         public UIA_CONTROLTYPE_ID ControlType => _element.CachedControlType;
         public bool HasKeyboardFocus => _element.CachedHasKeyboardFocus;
@@ -32,6 +35,9 @@ namespace AccView.ViewModels
         // Must be requested!
         [ObservableProperty]
         public partial ObservableCollection<AutomationElementViewModel>? Children { get; private set; } = null;
+
+        [ObservableProperty]
+        public partial AutomationElementViewModel? Parent { get; private set; } = null;
 
         private readonly IUIAutomation _uia;
 
@@ -106,7 +112,7 @@ namespace AccView.ViewModels
             UIA_PROPERTY_ID.UIA_IsOffscreenPropertyId,
         ];
 
-        public AutomationElementViewModel(IUIAutomation uia, IUIAutomationElement element)
+        public AutomationElementViewModel(IUIAutomation uia, IUIAutomationElement element, AutomationElementViewModel? parent)
         {
             _uia = uia;
 
@@ -123,8 +129,10 @@ namespace AccView.ViewModels
             var rect = _element.CachedBoundingRectangle;
             BoundingRect = new Rectangle(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
 
-            // TODO: runtimeID
-            var runtimeIdObj = _element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
+            var runtimeIdObj = (int[])_element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
+            RuntimeId = runtimeIdObj;
+
+            Parent = parent;
 
             // TODO: register for change events
         }
@@ -146,7 +154,7 @@ namespace AccView.ViewModels
                 // TODO: Merge with existing children.
                 //if (Children?.Count < knownChildrenIndex)
 
-                var childViewModel = new AutomationElementViewModel(_uia, childElement);
+                var childViewModel = new AutomationElementViewModel(_uia, childElement, parent: this);
                 Children?.Add(childViewModel);
             }
         }
