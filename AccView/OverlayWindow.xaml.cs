@@ -39,6 +39,10 @@ public sealed partial class OverlayWindow : WinUIEx.WindowEx
 
         ItemBorder.Height = ToDp(regionInPhysicalPixels.Height) + marginIncrease;
         ItemBorder.Width = ToDp(regionInPhysicalPixels.Width) + marginIncrease;
+
+        Canvas.SetLeft(SizeBorder, ToDp(regionInPhysicalPixels.X));
+        Canvas.SetTop(SizeBorder, ToDp(regionInPhysicalPixels.Y));
+        SizeTextBlock.Text = $"({regionInPhysicalPixels.X},{regionInPhysicalPixels.Y})";
     }
 
     private double ToDp(double pixels)

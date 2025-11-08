@@ -17,6 +17,18 @@
     </winex:WindowEx.SystemBackdrop>
 
     <Canvas>
+        <Border
+            x:Name="SizeBorder"
+            CornerRadius="4"
+            Padding="2"
+            Background="{ThemeResource SolidBackgroundFillColorBaseBrush}">
+            <TextBlock
+                x:Name="SizeTextBlock"
+                Style="{StaticResource CaptionTextBlockStyle}">
+                (0,4)
+            </TextBlock>
+        </Border>
+
         <!-- TODO: better color -->
         <Border
             x:Name="ItemBorder"
