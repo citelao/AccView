@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.UI.Dispatching;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -41,6 +42,7 @@ namespace AccView.ViewModels
 
         private readonly IUIAutomation _uia;
         private readonly AutomationTreeViewModel _factory;
+        private readonly DispatcherQueue _dispatcherQueue;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ControlType))]
@@ -118,6 +120,7 @@ namespace AccView.ViewModels
         {
             _uia = uia;
             _factory = factory;
+            _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
             Parent = parent;
 
@@ -157,14 +160,22 @@ namespace AccView.ViewModels
 
         public void LoadChildren()
         {
+            if (!_dispatcherQueue.HasThreadAccess)
+            {
+                throw new Exception("LoadChildren must be called on the UI thread.");
+            }
+
             var children = _element.FindAll(TreeScope.TreeScope_Children, _factory.TreeCondition);
             Children ??= new ObservableCollection<AutomationElementViewModel>();
+
+            // TODO handle merging with existing list.
+            Children.Clear();
+
             for (int i = 0; i < children.Length; i++)
             {
                 var childElement = children.GetElement(i);
                 var childViewModel = _factory.GetOrCreateNormalized(childElement, parent: this);
 
-                // TODO handle merging with existing list.
 
                 Children?.Add(childViewModel);
             }

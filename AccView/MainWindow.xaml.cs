@@ -64,7 +64,6 @@ namespace AccView
             _uia.CreateEventHandlerGroup(out _eventHandlerGroup);
 
             // TODO: cache
-            _focusChangedHandler.FocusChanged += FocusChanged;
             _uia.AddFocusChangedEventHandler(_uia.CreateCacheRequest(), _focusChangedHandler);
 
             overlayWindow = window;
@@ -73,6 +72,8 @@ namespace AccView
         private void Grid_Loaded(object sender, RoutedEventArgs e)
         {
             avmFactory.LoadRoot();
+
+            // _focusChangedHandler.FocusChanged += FocusChanged;
         }
 
         private void ElementsTreeView_Expanding(TreeView sender, TreeViewExpandingEventArgs args)
@@ -104,14 +105,16 @@ namespace AccView
 
         private async void FocusChanged(object sender, FocusChangedEventHandler.FocusChangedEventArgs e)
         {
+            // We need to load UIA stuff on a different thread. Otherwise looking at our current window will hang.
+            throw new NotImplementedException("Ooof");
+
             var focusedElement = e.Element!;
 
             // Find the corresponding view model.
-            // TODO: parent.
-            AutomationElementViewModel? parent = null;
-            var tempVm = avmFactory.GetOrCreateNormalized(focusedElement, parent: parent);
             await DispatcherQueue.EnqueueAsync(() =>
             {
+                // TODO: load on non-UI thread?
+                var tempVm = avmFactory.GetOrCreateNormalizedWithParents(focusedElement);
                 OutputTextBlock.Text += $"\nFocus changed to element: {tempVm.Name} ({tempVm.LocalizedControlType}, {tempVm.RuntimeIdString})";
             });
         }
@@ -123,17 +126,56 @@ namespace AccView
 
             var rawElement = _uia.ElementFromPoint(point);
 
-            var element = avmFactory.GetOrCreateNormalizedWithParents(rawElement);
-
-            await Task.Delay(100); // Allow UI to update.
-
             // Expand tree to the selected item.
             //ElementsTreeView.SelectedItem = currentViewModel;
             //var container = ElementsTreeView.ContainerFromItem(currentViewModel);
-            //var node = ElementsTreeView.NodeFromContainer(container);
+            //var rootNode = ElementsTreeView.NodeFromContainer(container);
             //ElementsTreeView.Expand(node);
 
-            ElementDetail.Navigate(typeof(ElementDetailPage), element);
+            //ElementDetail.Navigate(typeof(ElementDetailPage), element);
+
+            var element = avmFactory.GetOrCreateNormalizedWithParents(rawElement);
+
+            await Task.Delay(100);
+
+            var chain = new Stack<AutomationElementViewModel>();
+            var current = element;
+            while (current != null)
+            {
+                chain.Push(current);
+                current = current.Parent;
+            }
+
+            // Expand tree to the focused item.
+            var rootVm = chain.Pop();
+            var rootContainer = ElementsTreeView.ContainerFromItem(rootVm);
+            var rootNode = ElementsTreeView.NodeFromContainer(rootContainer);
+
+            var currentNode = rootNode;
+            bool shouldContinue = true;
+            while (chain.Count > 0 && shouldContinue)
+            {
+                var vm = chain.Pop();
+
+                if (currentNode.Children == null)
+                {
+                    // Testing.
+                    shouldContinue = false;
+                    continue;
+                }
+
+                var applicableChildNode = currentNode.Children.FirstOrDefault((c) => (AutomationElementViewModel)c.Content == vm);
+
+                if (applicableChildNode == null)
+                {
+                    // Testing.
+                    shouldContinue = false;
+                    continue;
+                }
+
+                currentNode.IsExpanded = true;
+                currentNode = applicableChildNode;
+            }
         }
 
         // TODO: move highlight on focus, too.
