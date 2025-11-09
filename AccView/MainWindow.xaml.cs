@@ -29,10 +29,9 @@ namespace AccView
         private IUIAutomation _uia;
         private readonly IUIAutomationCondition _trueCondition;
 
-        public delegate void MoveOutlineDelegate(Rect rect);
-        private MoveOutlineDelegate? _moveOutlineFunc;
+        private OverlayWindow? overlayWindow = null;
 
-        public MainWindow(MoveOutlineDelegate? func)
+        public MainWindow(OverlayWindow? window)
         {
             InitializeComponent();
             _uia = UIAHelpers.CreateUIAutomationInstance();
@@ -40,7 +39,7 @@ namespace AccView
             // TODO: support a different view.
             _trueCondition = _uia.CreateTrueCondition();
 
-            _moveOutlineFunc = func;
+            overlayWindow = window;
         }
 
         private void Grid_Loaded(object sender, RoutedEventArgs e)
@@ -162,15 +161,18 @@ namespace AccView
         {
             var item = sender as TreeViewItem;
             var vm = ElementsTreeView.ItemFromContainer(item) as AutomationElementViewModel;
-            if (_moveOutlineFunc != null)
-            {
-                var rect = RectHelper.FromCoordinatesAndDimensions(
-                    (float)vm!.BoundingRect.X,
-                    (float)vm!.BoundingRect.Y,
-                    (float)vm!.BoundingRect.Width,
-                    (float)vm!.BoundingRect.Height);
-                _moveOutlineFunc(rect);
-            }
+            var rect = RectHelper.FromCoordinatesAndDimensions(
+                (float)vm!.BoundingRect.X,
+                (float)vm!.BoundingRect.Y,
+                (float)vm!.BoundingRect.Width,
+                (float)vm!.BoundingRect.Height);
+            overlayWindow?.MoveFocusRing(rect);
+        }
+
+        private void WindowEx_Closed(object sender, WindowEventArgs args)
+        {
+            overlayWindow?.Close();
+            overlayWindow = null;
         }
     }
 }

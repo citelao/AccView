@@ -11,7 +11,8 @@
     mc:Ignorable="d"
     Height="480"
     Width="640"
-    Title="AccView">
+    Title="AccView"
+    Closed="WindowEx_Closed">
 
     <winex:WindowEx.SystemBackdrop>
         <MicaBackdrop />

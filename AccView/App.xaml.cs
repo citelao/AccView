@@ -15,6 +15,7 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using WinUIEx;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -45,10 +46,10 @@ namespace AccView
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
             _overlayWindow = new OverlayWindow();
-            _overlayWindow.Activate();
+            _window = new MainWindow(_overlayWindow);
 
-            _window = new MainWindow(_overlayWindow.MoveFocusRing);
             _window.Activate();
+            _overlayWindow.Show();
         }
     }
 }
