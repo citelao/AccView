@@ -26,7 +26,7 @@ namespace AccView
     {
         public ObservableCollection<AutomationElementViewModel> AccessibilityTree = new();
 
-        private IUIAutomation _uia;
+        private IUIAutomation6 _uia;
         private readonly IUIAutomationCondition _trueCondition;
 
         private OverlayWindow? overlayWindow = null;
@@ -38,6 +38,8 @@ namespace AccView
 
             // TODO: support a different view.
             _trueCondition = _uia.CreateTrueCondition();
+
+            _uia.CreateEventHandlerGroup(out var handlerGroup);
 
             overlayWindow = window;
         }

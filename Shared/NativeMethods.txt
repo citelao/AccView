@@ -1,5 +1,7 @@
 CUIAutomation
+CUIAutomation8
 IUIAutomation
+IUIAutomation6
 CoCreateInstance
 
 IUIAutomationExpandCollapsePattern
