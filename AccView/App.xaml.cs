@@ -48,8 +48,12 @@ namespace AccView
             _overlayWindow = new OverlayWindow();
             _window = new MainWindow(_overlayWindow);
 
-            _window.Activate();
             _overlayWindow.Show();
+            _window.Activate();
+
+            // Activate doesn't do anything lol.
+            // https://github.com/microsoft/microsoft-ui-xaml/issues/7595
+            _window.SetForegroundWindow();
         }
     }
 }
