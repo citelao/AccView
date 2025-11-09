@@ -31,8 +31,9 @@ namespace AccView
         public ObservableCollection<AutomationElementViewModel> AccessibilityTree = new();
 
         private IUIAutomation6 _uia;
-        private readonly IUIAutomationCondition _trueCondition;
+        private IUIAutomationCondition _condition;
         private IUIAutomationEventHandlerGroup? _eventHandlerGroup = null;
+        AutomationElementViewModelFactory avmFactory;
 
         private class FocusChangedEventHandler : IUIAutomationFocusChangedEventHandler
         {
@@ -56,9 +57,8 @@ namespace AccView
         {
             InitializeComponent();
             _uia = UIAHelpers.CreateUIAutomationInstance();
-
-            // TODO: support a different view.
-            _trueCondition = _uia.CreateTrueCondition();
+            _condition = _uia.ControlViewCondition;
+            avmFactory = new AutomationElementViewModelFactory(_uia, _condition);
 
             // https://learn.microsoft.com/en-us/windows/win32/api/uiautomationclient/nn-uiautomationclient-iuiautomationeventhandlergroup
             _uia.CreateEventHandlerGroup(out _eventHandlerGroup);
@@ -73,13 +73,11 @@ namespace AccView
         private void Grid_Loaded(object sender, RoutedEventArgs e)
         {
             var root = _uia.GetRootElement();
-            var children = root.FindAll(Windows.Win32.UI.Accessibility.TreeScope.TreeScope_Children, _trueCondition);
+            var children = root.FindAll(TreeScope.TreeScope_Children, _condition);
             for (int i = 0; i < children.Length; i++)
             {
                 var element = children.GetElement(i);
-                var vm = new AutomationElementViewModel(_uia, element, parent: null);
-                vm.LoadChildren();
-
+                var vm = avmFactory.GetOrCreateNormalized(element, parent: null);
                 AccessibilityTree.Add(vm);
             }
         }
@@ -113,11 +111,12 @@ namespace AccView
 
         private async void FocusChanged(object sender, FocusChangedEventHandler.FocusChangedEventArgs e)
         {
-            var focusedElement = e.Element;
+            var focusedElement = e.Element!;
 
             // Find the corresponding view model.
-            // TODO.
-            var tempVm = new AutomationElementViewModel(_uia, focusedElement!, parent: null);
+            // TODO: parent.
+            AutomationElementViewModel? parent = null;
+            var tempVm = avmFactory.GetOrCreateNormalized(focusedElement, parent: parent);
             await DispatcherQueue.EnqueueAsync(() =>
             {
                 OutputTextBlock.Text += $"\nFocus changed to element: {tempVm.Name} ({tempVm.LocalizedControlType}, {tempVm.RuntimeIdString})";
@@ -129,11 +128,12 @@ namespace AccView
             // Get current mouse cursor coordinates.
             var point = CursorHelpers.GetCursorPosition();
 
-            var element = _uia.ElementFromPoint(point);
+            var rawElement = _uia.ElementFromPoint(point);
 
             // Find element's ancestors.
-            // TODO: need to normalize this to match the tree view I'm using.
-            var treeWalker = _uia.CreateTreeWalker(_trueCondition);
+            var treeWalker = _uia.CreateTreeWalker(_condition);
+            var element = treeWalker.NormalizeElement(rawElement);
+
             var path = new Stack<IUIAutomationElement>();
             var currentElement = element;
             while (currentElement != null)
