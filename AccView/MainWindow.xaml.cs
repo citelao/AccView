@@ -79,6 +79,7 @@ namespace AccView
                 var element = children.GetElement(i);
                 var vm = avmFactory.GetOrCreateNormalized(element, parent: null);
 
+                // Load the immediate children for all root elements: this lets us know which ones are expandable.
                 vm.LoadChildren();
 
                 AccessibilityTree.Add(vm);
