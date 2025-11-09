@@ -9,4 +9,8 @@ IUIAutomationInvokePattern
 IUIAutomationTextPattern
 IUIAutomationValuePattern
 
+IUIAutomationFocusChangedEventHandler
+
+CFocusHandler
+
 GetCursorPos

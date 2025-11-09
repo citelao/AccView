@@ -20,6 +20,10 @@ using Windows.Foundation.Collections;
 using Windows.Win32.UI.Accessibility;
 using WinUIEx;
 
+using CommunityToolkit.Common.Extensions;
+using CommunityToolkit.WinUI;
+
+
 namespace AccView
 {
     public sealed partial class MainWindow : WinUIEx.WindowEx
@@ -28,6 +32,23 @@ namespace AccView
 
         private IUIAutomation6 _uia;
         private readonly IUIAutomationCondition _trueCondition;
+        private IUIAutomationEventHandlerGroup? _eventHandlerGroup = null;
+
+        private class FocusChangedEventHandler : IUIAutomationFocusChangedEventHandler
+        {
+            public class FocusChangedEventArgs : EventArgs
+            {
+                public IUIAutomationElement? Element { get; set; }
+            }
+
+            public event EventHandler<FocusChangedEventArgs>? FocusChanged;
+
+            public void HandleFocusChangedEvent(IUIAutomationElement sender)
+            {
+                FocusChanged?.Invoke(this, new FocusChangedEventArgs { Element = sender });
+            }
+        }
+        private FocusChangedEventHandler _focusChangedHandler = new();
 
         private OverlayWindow? overlayWindow = null;
 
@@ -39,7 +60,12 @@ namespace AccView
             // TODO: support a different view.
             _trueCondition = _uia.CreateTrueCondition();
 
-            _uia.CreateEventHandlerGroup(out var handlerGroup);
+            // https://learn.microsoft.com/en-us/windows/win32/api/uiautomationclient/nn-uiautomationclient-iuiautomationeventhandlergroup
+            _uia.CreateEventHandlerGroup(out _eventHandlerGroup);
+
+            // TODO: cache
+            _focusChangedHandler.FocusChanged += FocusChanged;
+            _uia.AddFocusChangedEventHandler(_uia.CreateCacheRequest(), _focusChangedHandler);
 
             overlayWindow = window;
         }
@@ -83,6 +109,19 @@ namespace AccView
         {
             var selectedItem = args.AddedItems.FirstOrDefault() as AutomationElementViewModel;
             ElementDetail.Navigate(typeof(ElementDetailPage), selectedItem, new SuppressNavigationTransitionInfo());
+        }
+
+        private async void FocusChanged(object sender, FocusChangedEventHandler.FocusChangedEventArgs e)
+        {
+            var focusedElement = e.Element;
+
+            // Find the corresponding view model.
+            // TODO.
+            var tempVm = new AutomationElementViewModel(_uia, focusedElement!, parent: null);
+            await DispatcherQueue.EnqueueAsync(() =>
+            {
+                OutputTextBlock.Text += $"\nFocus changed to element: {tempVm.Name} ({tempVm.LocalizedControlType}, {tempVm.RuntimeIdString})";
+            });
         }
 
         private async void FromCursor_Click(object sender, RoutedEventArgs e)
