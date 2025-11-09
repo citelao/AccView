@@ -32,7 +32,7 @@
             <ColumnDefinition Width="2*" /> <!-- Details -->
         </Grid.ColumnDefinitions>
 
-        <ScrollViewer>
+        <ScrollViewer x:Name="ElementsScrollViewer">
             <StackPanel>
                 <TreeView x:Name="ElementsTreeView"
                           ItemsSource="{x:Bind AccessibilityTree}"

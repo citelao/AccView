@@ -132,8 +132,6 @@ namespace AccView
             //var rootNode = ElementsTreeView.NodeFromContainer(container);
             //ElementsTreeView.Expand(node);
 
-            //ElementDetail.Navigate(typeof(ElementDetailPage), element);
-
             var element = avmFactory.GetOrCreateNormalizedWithParents(rawElement);
 
             await Task.Delay(100);
@@ -175,7 +173,15 @@ namespace AccView
 
                 currentNode.IsExpanded = true;
                 currentNode = applicableChildNode;
+
+                // TODO: testing.
+                await Task.Delay(100);
             }
+
+            ElementsTreeView.SelectedItem = element;
+            var finalContainer = ElementsTreeView.ContainerFromItem(element) as UIElement;
+            finalContainer?.StartBringIntoView();
+            ElementDetail.Navigate(typeof(ElementDetailPage), element);
         }
 
         // TODO: move highlight on focus, too.
