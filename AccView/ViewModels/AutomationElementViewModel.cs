@@ -40,7 +40,7 @@ namespace AccView.ViewModels
         public partial AutomationElementViewModel? Parent { get; private set; } = null;
 
         private readonly IUIAutomation _uia;
-        private readonly AutomationElementViewModelFactory _factory;
+        private readonly AutomationTreeViewModel _factory;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ControlType))]
@@ -114,7 +114,7 @@ namespace AccView.ViewModels
             UIA_PROPERTY_ID.UIA_IsOffscreenPropertyId,
         ];
 
-        public AutomationElementViewModel(IUIAutomation uia, IUIAutomationElement element, AutomationElementViewModel? parent, AutomationElementViewModelFactory factory)
+        public AutomationElementViewModel(IUIAutomation uia, IUIAutomationElement element, AutomationElementViewModel? parent, AutomationTreeViewModel factory)
         {
             _uia = uia;
             _factory = factory;
@@ -157,18 +157,15 @@ namespace AccView.ViewModels
 
         public void LoadChildren()
         {
-            // TODO: condition...
-            var condition = _uia.CreateTrueCondition();
-            var children = _element.FindAll(TreeScope.TreeScope_Children, condition);
+            var children = _element.FindAll(TreeScope.TreeScope_Children, _factory.TreeCondition);
             Children ??= new ObservableCollection<AutomationElementViewModel>();
             for (int i = 0; i < children.Length; i++)
             {
                 var childElement = children.GetElement(i);
+                var childViewModel = _factory.GetOrCreateNormalized(childElement, parent: this);
 
-                // TODO: Merge with existing children.
-                //if (Children?.Count < knownChildrenIndex)
+                // TODO handle merging with existing list.
 
-                var childViewModel = _factory.GetOrCreateNormalized(childElement, this);
                 Children?.Add(childViewModel);
             }
         }

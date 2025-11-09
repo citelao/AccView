@@ -28,12 +28,12 @@ namespace AccView
 {
     public sealed partial class MainWindow : WinUIEx.WindowEx
     {
-        public ObservableCollection<AutomationElementViewModel> AccessibilityTree = new();
+        public ObservableCollection<AutomationElementViewModel> AccessibilityTree => avmFactory.Tree;
 
         private IUIAutomation6 _uia;
         private IUIAutomationCondition _condition;
         private IUIAutomationEventHandlerGroup? _eventHandlerGroup = null;
-        AutomationElementViewModelFactory avmFactory;
+        AutomationTreeViewModel avmFactory;
 
         private class FocusChangedEventHandler : IUIAutomationFocusChangedEventHandler
         {
@@ -58,7 +58,7 @@ namespace AccView
             InitializeComponent();
             _uia = UIAHelpers.CreateUIAutomationInstance();
             _condition = _uia.ControlViewCondition;
-            avmFactory = new AutomationElementViewModelFactory(_uia, _condition);
+            avmFactory = new AutomationTreeViewModel(_uia, _condition);
 
             // https://learn.microsoft.com/en-us/windows/win32/api/uiautomationclient/nn-uiautomationclient-iuiautomationeventhandlergroup
             _uia.CreateEventHandlerGroup(out _eventHandlerGroup);
@@ -72,18 +72,7 @@ namespace AccView
 
         private void Grid_Loaded(object sender, RoutedEventArgs e)
         {
-            var root = _uia.GetRootElement();
-            var children = root.FindAll(TreeScope.TreeScope_Children, _condition);
-            for (int i = 0; i < children.Length; i++)
-            {
-                var element = children.GetElement(i);
-                var vm = avmFactory.GetOrCreateNormalized(element, parent: null);
-
-                // Load the immediate children for all root elements: this lets us know which ones are expandable.
-                vm.LoadChildren();
-
-                AccessibilityTree.Add(vm);
-            }
+            avmFactory.LoadRoot();
         }
 
         private void ElementsTreeView_Expanding(TreeView sender, TreeViewExpandingEventArgs args)
@@ -134,61 +123,7 @@ namespace AccView
 
             var rawElement = _uia.ElementFromPoint(point);
 
-            // Find element's ancestors.
-            var treeWalker = _uia.CreateTreeWalker(_condition);
-            var element = treeWalker.NormalizeElement(rawElement);
-
-            var path = new Stack<IUIAutomationElement>();
-            var currentElement = element;
-            while (currentElement != null)
-            {
-                path.Push(currentElement);
-                currentElement = treeWalker.GetParentElement(currentElement);
-            }
-
-            var rootUiaElement = path.Pop();
-            var isRoot = _uia.CompareElements(_uia.GetRootElement(), rootUiaElement);
-            if (!isRoot)
-            {
-                throw new InvalidOperationException("Could not find root element.");
-            }
-
-            // Now walk down the tree to find the corresponding view model.
-            var rootWindowUiaElement = path.Pop();
-            var rootViewModel = AccessibilityTree.FirstOrDefault(vm => vm.IsElement(rootWindowUiaElement));
-            if (rootViewModel == null)
-            {
-                throw new InvalidOperationException("Could not find root element in the accessibility tree.");
-            }
-
-            var currentViewModel = rootViewModel;
-            var currentContainer = (TreeViewItem)ElementsTreeView.ContainerFromItem(currentViewModel);
-            var currentNode = ElementsTreeView.NodeFromContainer(currentContainer);
-            while (path.Count > 0)
-            {
-                var nextUiaElement = path.Pop();
-
-                // TODO: don't load all children.
-                currentViewModel.LoadChildren();
-
-                // Expand the current node.
-                currentNode.IsExpanded = true;
-
-                var nextViewModel = currentViewModel.Children?.FirstOrDefault(vm => vm.IsElement(nextUiaElement));
-                if (nextViewModel == null)
-                {
-                    throw new InvalidOperationException("Could not find element in the accessibility tree.");
-                }
-
-                //var nextNode = currentNode.Children.FirstOrDefault(n => n.Content == nextViewModel);
-                //if (nextNode == null)
-                //{
-                //    throw new InvalidOperationException("Could not find tree node for the element.");
-                //}
-
-                currentViewModel = nextViewModel;
-                //currentNode = nextNode;
-            }
+            var element = avmFactory.GetOrCreateNormalizedWithParents(rawElement);
 
             await Task.Delay(100); // Allow UI to update.
 
@@ -198,7 +133,7 @@ namespace AccView
             //var node = ElementsTreeView.NodeFromContainer(container);
             //ElementsTreeView.Expand(node);
 
-            ElementDetail.Navigate(typeof(ElementDetailPage), currentViewModel);
+            ElementDetail.Navigate(typeof(ElementDetailPage), element);
         }
 
         // TODO: move highlight on focus, too.
