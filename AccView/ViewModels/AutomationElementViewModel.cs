@@ -27,10 +27,10 @@ namespace AccView.ViewModels
         public partial RuntimeIdT RuntimeId { get; private set; }
         public string RuntimeIdString => $"[{string.Join(",", RuntimeId)}]";
 
-        public UIA_CONTROLTYPE_ID ControlType => _element.CachedControlType;
-        public bool HasKeyboardFocus => _element.CachedHasKeyboardFocus;
-        public bool IsEnabled => _element.CachedIsEnabled;
-        public bool IsOffscreen => _element.CachedIsOffscreen;
+        public UIA_CONTROLTYPE_ID ControlType => RawElement.CachedControlType;
+        public bool HasKeyboardFocus => RawElement.CachedHasKeyboardFocus;
+        public bool IsEnabled => RawElement.CachedIsEnabled;
+        public bool IsOffscreen => RawElement.CachedIsOffscreen;
 
         // Must be requested!
         [ObservableProperty]
@@ -40,6 +40,7 @@ namespace AccView.ViewModels
         public partial AutomationElementViewModel? Parent { get; private set; } = null;
 
         private readonly IUIAutomation _uia;
+        private readonly AutomationTreeViewModel? _treeViewModel = null;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ControlType))]
@@ -47,7 +48,7 @@ namespace AccView.ViewModels
         [NotifyPropertyChangedFor(nameof(IsEnabled))]
         [NotifyPropertyChangedFor(nameof(IsOffscreen))]
         [NotifyPropertyChangedFor(nameof(IsInvokePatternAvailable))]
-        private partial IUIAutomationElement _element { get; set; }
+        public partial IUIAutomationElement RawElement { get; private set; }
 
         /// <summary>
         /// Properties for checking pattern availability
@@ -113,40 +114,51 @@ namespace AccView.ViewModels
             UIA_PROPERTY_ID.UIA_IsOffscreenPropertyId,
         ];
 
-        public AutomationElementViewModel(IUIAutomation uia, IUIAutomationElement element, AutomationElementViewModel? parent)
+        public AutomationElementViewModel(IUIAutomation uia, IUIAutomationElement element, AutomationElementViewModel? parent, AutomationTreeViewModel? treeViewModel)
         {
             _uia = uia;
+
+            Parent = parent;
+            _treeViewModel = treeViewModel;
 
             var cache = _uia.CreateCacheRequest();
             foreach (var propertyId in DefaultCachedProperties)
             {
                 cache.AddProperty(propertyId);
             }
-            _element = element.BuildUpdatedCache(cache);
+            RawElement = element.BuildUpdatedCache(cache);
 
-            Name = (string)_element.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId);
-            LocalizedControlType = (string)_element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId);
+            Name = (string)RawElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId);
+            LocalizedControlType = (string)RawElement.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId);
 
-            var rect = _element.CachedBoundingRectangle;
+            var rect = RawElement.CachedBoundingRectangle;
             BoundingRect = new Rectangle(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
 
-            var runtimeIdObj = (int[])_element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
+            var runtimeIdObj = GetCachedRuntimeId(element);
             RuntimeId = runtimeIdObj;
-
-            Parent = parent;
 
             // TODO: register for change events
         }
 
+        public static RuntimeIdT GetCachedRuntimeId(IUIAutomationElement element)
+        {
+            return (RuntimeIdT)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
+        }
+
+        public static RuntimeIdT GetCurrentRuntimeId(IUIAutomationElement element)
+        {
+            return (RuntimeIdT)element.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
+        }
+
         public bool IsElement(IUIAutomationElement element)
         {
-            return _uia.CompareElements(_element, element);
+            return _uia.CompareElements(RawElement, element);
         }
 
         public void LoadChildren()
         {
             var condition = _uia.CreateTrueCondition();
-            var children = _element.FindAll(TreeScope.TreeScope_Children, condition);
+            var children = RawElement.FindAll(TreeScope.TreeScope_Children, condition);
             Children ??= new ObservableCollection<AutomationElementViewModel>();
             for (int i = 0; i < children.Length; i++)
             {
@@ -181,12 +193,12 @@ namespace AccView.ViewModels
                 cache.AddProperty(propertyId);
             }
 
-            _element = _element.BuildUpdatedCache(cache);
+            RawElement = RawElement.BuildUpdatedCache(cache);
         }
 
         public bool IsPatternAvailable(KnownPattern pattern)
         {
-            return pattern.CachedIsAvailable(_element);
+            return pattern.CachedIsAvailable(RawElement);
         }
 
         public bool IsInvokePatternAvailable => IsPatternAvailable(KnownPattern.All[UIA_PATTERN_ID.UIA_InvokePatternId]);
@@ -201,7 +213,7 @@ namespace AccView.ViewModels
             }
 
             // TODO: use type introspection?
-            var pattern = (IUIAutomationInvokePattern)invoke.CachedGetRaw(_element);
+            var pattern = (IUIAutomationInvokePattern)invoke.CachedGetRaw(RawElement);
             pattern.Invoke();
         }
     }
