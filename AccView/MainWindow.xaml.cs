@@ -78,6 +78,9 @@ namespace AccView
             {
                 var element = children.GetElement(i);
                 var vm = avmFactory.GetOrCreateNormalized(element, parent: null);
+
+                vm.LoadChildren();
+
                 AccessibilityTree.Add(vm);
             }
         }

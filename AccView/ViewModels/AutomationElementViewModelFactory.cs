@@ -35,7 +35,6 @@ namespace AccView.ViewModels
         /// <summary>
         /// Get or create a ViewModel for the given element, normalized to the tree condition.
         /// </summary>
-        /// <param name="uia"></param>
         /// <param name="element"></param>
         /// <param name="parent"></param>
         /// <returns></returns>
