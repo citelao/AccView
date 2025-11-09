@@ -35,7 +35,7 @@ namespace AccView.ViewModels
 
         // Must be requested!
         [ObservableProperty]
-        public partial ObservableCollection<AutomationElementViewModel>? Children { get; private set; } = null;
+        public partial ObservableCollection<AutomationElementViewModel> Children { get; private set; } = [];
 
         [ObservableProperty]
         public partial AutomationElementViewModel? Parent { get; private set; } = null;
@@ -166,10 +166,14 @@ namespace AccView.ViewModels
             }
 
             var children = _element.FindAll(TreeScope.TreeScope_Children, _factory.TreeCondition);
-            Children ??= new ObservableCollection<AutomationElementViewModel>();
 
             // TODO handle merging with existing list.
-            Children.Clear();
+            // Children.Clear();
+            if (Children.Count != 0)
+            {
+                // Already loaded...
+                return;
+            }
 
             for (int i = 0; i < children.Length; i++)
             {
