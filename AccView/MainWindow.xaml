@@ -65,6 +65,11 @@
         </ScrollViewer>
 
         <Frame x:Name="ElementDetail"
+               Background="{ThemeResource LayerFillColorAltBrush}"
+               BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+               BorderThickness="1"
+               Padding="8,0"
+               CornerRadius="4,0,0,4"
                Grid.Column="1">
         </Frame>
 

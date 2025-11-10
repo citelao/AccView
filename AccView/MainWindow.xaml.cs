@@ -126,12 +126,6 @@ namespace AccView
 
             var rawElement = _uia.ElementFromPoint(point);
 
-            // Expand tree to the selected item.
-            //ElementsTreeView.SelectedItem = currentViewModel;
-            //var container = ElementsTreeView.ContainerFromItem(currentViewModel);
-            //var rootNode = ElementsTreeView.NodeFromContainer(container);
-            //ElementsTreeView.Expand(node);
-
             var element = avmFactory.GetOrCreateNormalizedWithParents(rawElement);
 
             await Task.Delay(100);
