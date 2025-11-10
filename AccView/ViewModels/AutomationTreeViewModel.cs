@@ -1,9 +1,9 @@
 ﻿using Microsoft.UI.Dispatching;
-using Shared;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Windows.System;
 using Windows.Win32.UI.Accessibility;
 
 #nullable enable
@@ -30,6 +30,8 @@ namespace AccView.ViewModels
 
         private IUIAutomationCacheRequest runtimeIdOnlyRequest;
 
+        private Microsoft.UI.Dispatching.DispatcherQueue dispatcherQueue;
+
         public AutomationTreeViewModel(IUIAutomation6 uia, IUIAutomationCondition walkerCondition)
         {
             this.uia = uia;
@@ -38,6 +40,8 @@ namespace AccView.ViewModels
 
             runtimeIdOnlyRequest = uia.CreateCacheRequest();
             runtimeIdOnlyRequest.AddProperty(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
+
+            dispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
         }
 
         /// <summary>
@@ -116,8 +120,12 @@ namespace AccView.ViewModels
             }
 
             // If not found, create it.
-            // TODO: auto-fetch parent?
-            // AutomationElementViewModel? parent = null;
+            // Create all ViewModels on the UI thread.
+            if (!dispatcherQueue.HasThreadAccess)
+            {
+                throw new InvalidOperationException("GetOrCreateNormalizedWithKnownParent must be called on the UI thread.");
+            }
+
             var newViewModel = new AutomationElementViewModel(uia, normalizedElement, parent: parent, factory: this);
             cache[runtimeId] = newViewModel;
 
