@@ -37,7 +37,8 @@
                 <TreeView x:Name="ElementsTreeView"
                           ItemsSource="{x:Bind AccessibilityTree}"
                           Expanding="ElementsTreeView_Expanding"
-                          SelectionChanged="ElementsTreeView_SelectionChanged">
+                          SelectionChanged="ElementsTreeView_SelectionChanged"
+                          Margin="4,0,0,0">
                 
                     <TreeView.Resources>
                         <ResourceDictionary 
@@ -55,14 +56,38 @@
                     </TreeView.ItemTemplate>
                 </TreeView>
 
-                <Button x:Name="FromCursor" Click="FromCursor_Click">
-                    <Button.KeyboardAccelerators>
-                        <KeyboardAccelerator Key="C" Modifiers="Control" />
-                    </Button.KeyboardAccelerators>
-                    Get from cursor
-                </Button>
             </StackPanel>
         </ScrollViewer>
+
+        <StackPanel
+            Grid.Row="1"
+            Orientation="Horizontal"
+            Spacing="4"
+            Margin="8,0,0,0">
+            <Button x:Name="FromCursor" Click="FromCursor_Click">
+                <Button.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="C" Modifiers="Control" />
+                </Button.KeyboardAccelerators>
+                Get from cursor
+            </Button>
+            <Border
+                ToolTipService.ToolTip="Follow pointer focus (not implemented)">
+                <ToggleButton
+                    Name="FollowPointerFocusButton"
+                    ToolTipService.ToolTip="Follow pointer focus"
+                    IsChecked="False"
+                    IsEnabled="False">
+                    <FontIcon Glyph="&#xE8B0;" FontSize="16" />
+                </ToggleButton>
+            </Border>
+            <ToggleButton
+                Name="FollowKeyboardFocusButton"
+                ToolTipService.ToolTip="Follow keyboard focus"
+                IsChecked="True"
+                Click="FollowKeyboardFocus_Click">
+                <FontIcon Glyph="&#xE8AC;" FontSize="16" />
+            </ToggleButton>
+        </StackPanel>
 
         <Frame x:Name="ElementDetail"
                Background="{ThemeResource LayerFillColorAltBrush}"
@@ -75,12 +100,12 @@
 
         <TextBox
             Grid.Row="1"
-            Grid.ColumnSpan="2"
+            Grid.Column="1"
             MaxHeight="100"
             x:Name="OutputTextBlock"
             AcceptsReturn="True"
             VerticalAlignment="Stretch"
-            HorizontalAlignment="Stretch"
-            Margin="8" />
+            HorizontalAlignment="Stretch" 
+            Margin="0,8,8,8"/>
     </Grid>
 </winex:WindowEx>

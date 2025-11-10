@@ -94,12 +94,12 @@ namespace AccView.ViewModels
         }
 
         /// <summary>
-        /// Get or create a ViewModel for the given element, normalized to the tree condition.
+        /// Get or create a ViewModel for the given element, normalized to the tree condition, with a known parent. If you don't know the parent, use GetOrCreateNormalized.
         /// </summary>
         /// <param name="element"></param>
         /// <param name="parent"></param>
         /// <returns></returns>
-        public AutomationElementViewModel GetOrCreateNormalized(IUIAutomationElement element, AutomationElementViewModel? parent)
+        public AutomationElementViewModel GetOrCreateNormalizedWithKnownParent(IUIAutomationElement element, AutomationElementViewModel? parent)
         {
             var runtimeId = AutomationElementViewModel.GetCurrentRuntimeId(element);
             if (cache.TryGetValue(runtimeId, out var existingViewModel))
@@ -124,7 +124,7 @@ namespace AccView.ViewModels
             return newViewModel;
         }
 
-        public AutomationElementViewModel GetOrCreateNormalizedWithParents(IUIAutomationElement element)
+        public AutomationElementViewModel GetOrCreateNormalized(IUIAutomationElement element)
         {
             // Do we already have it?
             var runtimeId = AutomationElementViewModel.GetCurrentRuntimeId(element);

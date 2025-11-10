@@ -17,11 +17,13 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Win32.Foundation;
 using Windows.Win32.UI.Accessibility;
 using WinUIEx;
 
 using CommunityToolkit.Common.Extensions;
 using CommunityToolkit.WinUI;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 
 namespace AccView
@@ -30,10 +32,15 @@ namespace AccView
     {
         public ObservableCollection<AutomationElementViewModel> AccessibilityTree => avmFactory.Tree;
 
+        // TODO:
+        // [GeneratedDependencyProperty]
+        private bool followKeyboardFocus { get; set; } = false;
+
         private IUIAutomation6 _uia;
         private IUIAutomationCondition _condition;
         private IUIAutomationEventHandlerGroup? _eventHandlerGroup = null;
-        AutomationTreeViewModel avmFactory;
+        private AutomationTreeViewModel avmFactory;
+        private IUIAutomationElement windowUiaElement;
 
         private class FocusChangedEventHandler : IUIAutomationFocusChangedEventHandler
         {
@@ -56,8 +63,14 @@ namespace AccView
         public MainWindow(OverlayWindow? window)
         {
             InitializeComponent();
+
             _uia = UIAHelpers.CreateUIAutomationInstance();
             _condition = _uia.ControlViewCondition;
+
+            // TODO: ignore all events?
+            var hwnd = this.GetWindowHandle();
+            windowUiaElement = _uia.ElementFromHandle(new HWND(hwnd));
+
             avmFactory = new AutomationTreeViewModel(_uia, _condition);
 
             // https://learn.microsoft.com/en-us/windows/win32/api/uiautomationclient/nn-uiautomationclient-iuiautomationeventhandlergroup
@@ -73,7 +86,7 @@ namespace AccView
         {
             avmFactory.LoadRoot();
 
-            // _focusChangedHandler.FocusChanged += FocusChanged;
+            _focusChangedHandler.FocusChanged += FocusChanged;
         }
 
         private void ElementsTreeView_Expanding(TreeView sender, TreeViewExpandingEventArgs args)
@@ -105,16 +118,16 @@ namespace AccView
 
         private async void FocusChanged(object sender, FocusChangedEventHandler.FocusChangedEventArgs e)
         {
-            // We need to load UIA stuff on a different thread. Otherwise looking at our current window will hang.
-            throw new NotImplementedException("Ooof");
-
             var focusedElement = e.Element!;
 
             // Find the corresponding view model.
             await DispatcherQueue.EnqueueAsync(() =>
             {
                 // TODO: load on non-UI thread?
-                var tempVm = avmFactory.GetOrCreateNormalizedWithParents(focusedElement);
+                var tempVm = avmFactory.GetOrCreateNormalized(focusedElement);
+
+                // TODO: ignore from current window windowUiaElement
+
                 OutputTextBlock.Text += $"\nFocus changed to element: {tempVm.Name} ({tempVm.LocalizedControlType}, {tempVm.RuntimeIdString})";
             });
         }
@@ -126,7 +139,7 @@ namespace AccView
 
             var rawElement = _uia.ElementFromPoint(point);
 
-            var element = avmFactory.GetOrCreateNormalizedWithParents(rawElement);
+            var element = avmFactory.GetOrCreateNormalized(rawElement);
 
             await Task.Delay(100);
 
@@ -195,6 +208,12 @@ namespace AccView
         {
             overlayWindow?.Close();
             overlayWindow = null;
+        }
+
+        private void FollowKeyboardFocus_Click(object sender, RoutedEventArgs e)
+        {
+            var newValue = FollowKeyboardFocusButton.IsChecked ?? false;
+            followKeyboardFocus = newValue;
         }
     }
 }
