@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Threading.Tasks;
 using Windows.Win32.UI.Accessibility;
 
 namespace AccView.ViewModels
@@ -157,6 +158,35 @@ namespace AccView.ViewModels
         public bool IsElement(IUIAutomationElement element)
         {
             return _uia.CompareElements(_element, element);
+        }
+
+        public static async Task MergeChildrenAsync(ObservableCollection<AutomationElementViewModel> existingChildren, IList<AutomationElementViewModel> newChildren, DispatcherQueue dispatcherQueue)
+        {
+            // EnqueueAsync runs directly if we have thread access.
+            await dispatcherQueue.EnqueueAsync(() =>
+            {
+                for (var i = 0; i < newChildren.Count; i++)
+                {
+                    var newChild = newChildren[i];
+                    var currentChild = (i < existingChildren.Count) ? existingChildren[i] : null;
+                    if (currentChild != null && currentChild.IsElement(newChild._element))
+                    {
+                        // Same element, do nothing.
+                        continue;
+                    }
+                    else
+                    {
+                        // Different element, insert the new one here.
+                        existingChildren.Insert(i, newChild);
+                    }
+                }
+
+                // Remove any extra children.
+                while (existingChildren.Count > newChildren.Count)
+                {
+                    existingChildren.RemoveAt(existingChildren.Count - 1);
+                }
+            });
         }
 
         public void LoadChildren()
