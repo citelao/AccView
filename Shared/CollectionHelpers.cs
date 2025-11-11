@@ -18,7 +18,7 @@ namespace Shared
         /// <param name="observableCollection">Observable collection to modify</param>
         /// <param name="newValues">New values to insert</param>
         /// <param name="equalityFunc">Comparison function</param>
-        public void UpdateObservableCollection<T>(ObservableCollection<T> observableCollection, IList<T> newValues, Func<T, T, bool> equalityFunc)
+        public static void UpdateObservableCollection<T>(ObservableCollection<T> observableCollection, IList<T> newValues, Func<T, T, bool> equalityFunc)
             where T : class
         {
             for (var i = 0; i < newValues.Count; i++)
@@ -42,6 +42,19 @@ namespace Shared
             {
                 observableCollection.RemoveAt(observableCollection.Count - 1);
             }
+        }
+
+        /// <inheritdoc />
+        public static void UpdateObservableCollection<T>(ObservableCollection<T> observableCollection, IList<T> newValues)
+            where T : class
+        {
+            UpdateObservableCollection(observableCollection, newValues, SimpleEquality);
+        }
+
+        public static bool SimpleEquality<T>(T a, T b)
+            where T : class
+        {
+            return a == b;
         }
     }
 }
