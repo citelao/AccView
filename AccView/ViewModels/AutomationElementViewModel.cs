@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.WinUI;
 using Microsoft.UI.Dispatching;
 using System;
 using System.Collections.Generic;
@@ -116,11 +117,11 @@ namespace AccView.ViewModels
             UIA_PROPERTY_ID.UIA_IsOffscreenPropertyId,
         ];
 
-        public AutomationElementViewModel(IUIAutomation uia, IUIAutomationElement element, AutomationElementViewModel? parent, AutomationTreeViewModel factory)
+        public AutomationElementViewModel(IUIAutomation uia, IUIAutomationElement element, AutomationElementViewModel? parent, AutomationTreeViewModel factory, DispatcherQueue? dispatcherQueue)
         {
             _uia = uia;
             _factory = factory;
-            _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+            _dispatcherQueue = dispatcherQueue ?? DispatcherQueue.GetForCurrentThread();
 
             Parent = parent;
 
@@ -180,7 +181,11 @@ namespace AccView.ViewModels
                 var childElement = children.GetElement(i);
                 var childViewModel = _factory.GetOrCreateNormalizedWithKnownParent(childElement, parent: this);
 
-                Children?.Add(childViewModel);
+                // TODO: bad.
+                _dispatcherQueue.EnqueueAsync(() =>
+                {
+                    Children?.Add(childViewModel);
+                }).GetAwaiter().GetResult();
             }
         }
 

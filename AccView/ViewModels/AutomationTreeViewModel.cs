@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Dispatching;
+﻿using CommunityToolkit.WinUI;
+using Microsoft.UI.Dispatching;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -72,7 +73,7 @@ namespace AccView.ViewModels
                 else
                 {
                     // Otherwise, create a new ViewModel.
-                    vm = new AutomationElementViewModel(uia, element, parent: null, factory: this);
+                    vm = new AutomationElementViewModel(uia, element, parent: null, factory: this, dispatcherQueue: dispatcherQueue);
                     cache[runtimeId] = vm;
 
                     // Insert it at the current position.
@@ -126,7 +127,7 @@ namespace AccView.ViewModels
             //    throw new InvalidOperationException("GetOrCreateNormalizedWithKnownParent must be called on the UI thread.");
             //}
 
-            var newViewModel = new AutomationElementViewModel(uia, normalizedElement, parent: parent, factory: this);
+            var newViewModel = new AutomationElementViewModel(uia, normalizedElement, parent: parent, factory: this, dispatcherQueue: dispatcherQueue);
             cache[runtimeId] = newViewModel;
 
             return newViewModel;
@@ -172,9 +173,15 @@ namespace AccView.ViewModels
             if (rootViewModel == null)
             {
                 // If the root window view model doesn't exist yet, create it (it may be a new window).
-                var newViewModel = new AutomationElementViewModel(uia, rootWindowUiaElement, parent: null, factory: this);
+                var newViewModel = new AutomationElementViewModel(uia, rootWindowUiaElement, parent: null, factory: this, dispatcherQueue: dispatcherQueue);
                 cache[runtimeId] = newViewModel;
                 rootViewModel = newViewModel;
+
+                // TODO: add to the correct position in the tree?
+                dispatcherQueue.EnqueueAsync(() =>
+                {
+                    Tree.Add(newViewModel);
+                }).GetAwaiter().GetResult();
             }
 
             var currentViewModel = rootViewModel;

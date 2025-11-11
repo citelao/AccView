@@ -1,4 +1,7 @@
 using AccView.ViewModels;
+using CommunityToolkit.Common.Extensions;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.WinUI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -15,15 +18,12 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.Accessibility;
 using WinUIEx;
-
-using CommunityToolkit.Common.Extensions;
-using CommunityToolkit.WinUI;
-using CommunityToolkit.Mvvm.ComponentModel;
 
 
 namespace AccView
@@ -128,13 +128,14 @@ namespace AccView
             var tempVm = avmFactory.GetOrCreateNormalized(focusedElement);
 
             // Find the corresponding view model.
-            await DispatcherQueue.EnqueueAsync(() =>
+            await DispatcherQueue.EnqueueAsync(async () =>
             {
-
                 // TODO: ignore from current window windowUiaElement
 
                 OutputTextBlock.Text += $"\nFocus changed to element: {tempVm.Name} ({tempVm.LocalizedControlType}, {tempVm.RuntimeIdString})";
                 OutputTextBlock.Text += $"\n\t{ogName} ({ogLct}, {ogRid})";
+
+                await JumpToNodeAsync(tempVm);
             });
         }
 
@@ -149,6 +150,11 @@ namespace AccView
 
             await Task.Delay(100);
 
+            await JumpToNodeAsync(element);
+        }
+
+        private async Task JumpToNodeAsync(AutomationElementViewModel element)
+        {
             var chain = new Stack<AutomationElementViewModel>();
             var current = element;
             while (current != null)
