@@ -160,10 +160,10 @@ namespace AccView.ViewModels
 
         public void LoadChildren()
         {
-            if (!_dispatcherQueue.HasThreadAccess)
-            {
-                throw new Exception("LoadChildren must be called on the UI thread.");
-            }
+            //if (!_dispatcherQueue.HasThreadAccess)
+            //{
+            //    throw new Exception("LoadChildren must be called on the UI thread.");
+            //}
 
             var children = _element.FindAll(TreeScope.TreeScope_Children, _factory.TreeCondition);
 

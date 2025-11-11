@@ -121,10 +121,10 @@ namespace AccView.ViewModels
 
             // If not found, create it.
             // Create all ViewModels on the UI thread.
-            if (!dispatcherQueue.HasThreadAccess)
-            {
-                throw new InvalidOperationException("GetOrCreateNormalizedWithKnownParent must be called on the UI thread.");
-            }
+            //if (!dispatcherQueue.HasThreadAccess)
+            //{
+            //    throw new InvalidOperationException("GetOrCreateNormalizedWithKnownParent must be called on the UI thread.");
+            //}
 
             var newViewModel = new AutomationElementViewModel(uia, normalizedElement, parent: parent, factory: this);
             cache[runtimeId] = newViewModel;
@@ -171,7 +171,10 @@ namespace AccView.ViewModels
             var rootViewModel = Tree.FirstOrDefault(vm => vm.IsElement(rootWindowUiaElement));
             if (rootViewModel == null)
             {
-                throw new InvalidOperationException("Could not find root element in the accessibility tree.");
+                // If the root window view model doesn't exist yet, create it (it may be a new window).
+                var newViewModel = new AutomationElementViewModel(uia, rootWindowUiaElement, parent: null, factory: this);
+                cache[runtimeId] = newViewModel;
+                rootViewModel = newViewModel;
             }
 
             var currentViewModel = rootViewModel;

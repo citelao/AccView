@@ -120,15 +120,21 @@ namespace AccView
         {
             var focusedElement = e.Element!;
 
+            var ogName = focusedElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId) as string;
+            var ogLct = focusedElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId) as string;
+            var ogRid = AutomationElementViewModel.GetCurrentRuntimeId(focusedElement);
+
+            // TODO: load on non-UI thread?
+            var tempVm = avmFactory.GetOrCreateNormalized(focusedElement);
+
             // Find the corresponding view model.
             await DispatcherQueue.EnqueueAsync(() =>
             {
-                // TODO: load on non-UI thread?
-                var tempVm = avmFactory.GetOrCreateNormalized(focusedElement);
 
                 // TODO: ignore from current window windowUiaElement
 
                 OutputTextBlock.Text += $"\nFocus changed to element: {tempVm.Name} ({tempVm.LocalizedControlType}, {tempVm.RuntimeIdString})";
+                OutputTextBlock.Text += $"\n\t{ogName} ({ogLct}, {ogRid})";
             });
         }
 
