@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.WinUI;
 using Microsoft.UI.Dispatching;
+using Shared;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -160,33 +161,9 @@ namespace AccView.ViewModels
             return _uia.CompareElements(_element, element);
         }
 
-        public static async Task MergeChildrenAsync(ObservableCollection<AutomationElementViewModel> existingChildren, IList<AutomationElementViewModel> newChildren, DispatcherQueue dispatcherQueue)
+        private static void MergeChildren(ObservableCollection<AutomationElementViewModel> existingChildren, IList<AutomationElementViewModel> newChildren)
         {
-            // EnqueueAsync runs directly if we have thread access.
-            await dispatcherQueue.EnqueueAsync(() =>
-            {
-                for (var i = 0; i < newChildren.Count; i++)
-                {
-                    var newChild = newChildren[i];
-                    var currentChild = (i < existingChildren.Count) ? existingChildren[i] : null;
-                    if (currentChild != null && currentChild.IsElement(newChild._element))
-                    {
-                        // Same element, do nothing.
-                        continue;
-                    }
-                    else
-                    {
-                        // Different element, insert the new one here.
-                        existingChildren.Insert(i, newChild);
-                    }
-                }
-
-                // Remove any extra children.
-                while (existingChildren.Count > newChildren.Count)
-                {
-                    existingChildren.RemoveAt(existingChildren.Count - 1);
-                }
-            });
+            CollectionHelpers.UpdateObservableCollection(existingChildren, newChildren, (a, b) => a.IsElement(b._element));
         }
 
         public void LoadChildren()
@@ -197,26 +174,19 @@ namespace AccView.ViewModels
             //}
 
             var children = _element.FindAll(TreeScope.TreeScope_Children, _factory.TreeCondition);
-
-            // TODO handle merging with existing list.
-            // Children.Clear();
-            if (Children.Count != 0)
-            {
-                // Already loaded...
-                return;
-            }
-
+            var childVMs = new List<AutomationElementViewModel>();
             for (int i = 0; i < children.Length; i++)
             {
                 var childElement = children.GetElement(i);
                 var childViewModel = _factory.GetOrCreateNormalizedWithKnownParent(childElement, parent: this);
-
-                // TODO: bad.
-                _dispatcherQueue.EnqueueAsync(() =>
-                {
-                    Children?.Add(childViewModel);
-                }).GetAwaiter().GetResult();
+                childVMs.Add(childViewModel);
             }
+
+            // TODO: bad.
+            _dispatcherQueue.EnqueueAsync(() =>
+            {
+                MergeChildren(Children, childVMs);
+            }).GetAwaiter().GetResult();
         }
 
         public void LoadDetailedProperties()
