@@ -49,8 +49,6 @@ namespace AccView
 
         private class StructureChangedHandler : IUIAutomationStructureChangedEventHandler
         {
-            // private readonly IUIAutomation6 _uia;
-
             public struct StructureChangedEventArgs
             {
                 public required readonly IUIAutomationElement Sender { get; init; }
@@ -71,7 +69,35 @@ namespace AccView
                 };
             }
         }
+
+        private class NotificationEventHandler : IUIAutomationNotificationEventHandler
+        {
+            public struct NotificationEventArgs
+            {
+                public required readonly IUIAutomationElement Sender { get; init; }
+                public required readonly NotificationKind NotificationKind { get; init; }
+                public required readonly NotificationProcessing NotificationProcessing { get; init; }
+                public required readonly string DisplayString { get; init; }
+                public required readonly string ActivityId { get; init; }
+            }
+            public event EventHandler<NotificationEventArgs>? NotificationReceived;
+
+            public void HandleNotificationEvent(IUIAutomationElement sender, NotificationKind notificationKind, NotificationProcessing notificationProcessing, BSTR displayString, BSTR activityId)
+            {
+                var args = new NotificationEventArgs()
+                {
+                    Sender = sender,
+                    NotificationKind = notificationKind,
+                    NotificationProcessing = notificationProcessing,
+                    DisplayString = displayString.ToString(),
+                    ActivityId = activityId.ToString(),
+                };
+                NotificationReceived?.Invoke(this, args);
+            }
+        }
+
         private StructureChangedHandler _structureChangedHandler = new();
+        private NotificationEventHandler _notificationEventHandler = new();
 
         private OverlayWindow? overlayWindow = null;
 
@@ -92,7 +118,7 @@ namespace AccView
             // https://learn.microsoft.com/en-us/windows/win32/api/uiautomationclient/nn-uiautomationclient-iuiautomationeventhandlergroup
             _uia.CreateEventHandlerGroup(out _eventHandlerGroup);
 
-            // TODO: cache
+            // TODO: standardize cache
             var simpleInfoCacheRequest = _uia.CreateCacheRequest();
             simpleInfoCacheRequest.AddProperty(UIA_PROPERTY_ID.UIA_NamePropertyId);
             simpleInfoCacheRequest.AddProperty(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId);
@@ -100,16 +126,17 @@ namespace AccView
             simpleInfoCacheRequest.AddProperty(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
             simpleInfoCacheRequest.AddProperty(UIA_PROPERTY_ID.UIA_ControlTypePropertyId);
 
-
             _uia.AddFocusChangedEventHandler(simpleInfoCacheRequest, _focusChangedHandler);
 
             //_eventHandlerGroup.AddActiveTextPositionChangedEventHandler();
             // _eventHandlerGroup.AddAutomationEventHandler()
-            // _eventHandlerGroup.AddChangesEventHandler()
-            //_eventHandlerGroup.AddNotificationEventHandler
+            // _eventHandlerGroup.AddChangesEventHandler(TreeScope.TreeScope_Descendants, [9000],
+            _eventHandlerGroup.AddNotificationEventHandler(TreeScope.TreeScope_Descendants, simpleInfoCacheRequest, _notificationEventHandler);
             // _eventHandlerGroup.AddPropertyChangedEventHandler()
             _eventHandlerGroup.AddStructureChangedEventHandler(TreeScope.TreeScope_Descendants, simpleInfoCacheRequest, _structureChangedHandler);
             // _eventHandlerGroup.AddTextEditTextChangedEventHandler(TreeScope.TreeScope_Descendants, )
+
+            _uia.AddEventHandlerGroup(_uia.GetRootElement(), _eventHandlerGroup);
 
             overlayWindow = window;
         }
@@ -118,8 +145,15 @@ namespace AccView
         {
             avmFactory.LoadRoot();
 
+            // TODO: hook up event handlers
+            //foreach (var root in AccessibilityTree)
+            //{
+            //    _uia.AddEventHandlerGroup(root, _eventHandlerGroup);
+            //}
+
             _focusChangedHandler.FocusChanged += FocusChanged;
             _structureChangedHandler.StructureChanged += StructureChanged;
+            _notificationEventHandler.NotificationReceived += NotificationReceived;
         }
 
         private async void StructureChanged(object? sender, StructureChangedHandler.StructureChangedEventArgs e)
@@ -133,6 +167,19 @@ namespace AccView
             await DispatcherQueue.EnqueueAsync(() =>
             {
                 OutputTextBlock.Text += $"Structure changed: {e.ChangeType} on element: {ogName} ({ogLct}, {ogId}, {ogCt}, {ogRid})\n";
+            });
+        }
+
+        private async void NotificationReceived(object? sender, NotificationEventHandler.NotificationEventArgs e)
+        {
+            var ogName = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId) as string;
+            var ogId = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId) as string;
+            var ogLct = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId) as string;
+            var ogCt = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId) as int?;
+            var ogRid = AutomationElementViewModel.GetCachedRuntimeId(e.Sender);
+            await DispatcherQueue.EnqueueAsync(() =>
+            {
+                OutputTextBlock.Text += $"Notification received: {e.NotificationKind} / {e.NotificationProcessing} on element: {ogName} ({ogLct}, {ogId}, {ogCt}, {ogRid})\n\t{e.DisplayString}\n";
             });
         }
 
@@ -165,17 +212,23 @@ namespace AccView
 
         private async void FocusChanged(object sender, FocusChangedEventHandler.FocusChangedEventArgs e)
         {
+            var focusedElement = e.Element!;
+
+            var ogName = focusedElement.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId) as string;
+            var ogLct = focusedElement.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId) as string;
+            var ogRid = AutomationElementViewModel.GetCachedRuntimeId(focusedElement);
+
+            // Temp:
+            await DispatcherQueue.EnqueueAsync(() =>
+            {
+                OutputTextBlock.Text += $"Focus changed event received for element: {ogName} ({ogLct}, {ogRid})\n";
+            });
+
             if (!followKeyboardFocus)
             {
                 // Ignore focus changes.
                 return;
             }
-
-            var focusedElement = e.Element!;
-
-            var ogName = focusedElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId) as string;
-            var ogLct = focusedElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId) as string;
-            var ogRid = AutomationElementViewModel.GetCurrentRuntimeId(focusedElement);
 
             if (ogRid == null)
             {
