@@ -31,10 +31,23 @@ static RootCommand CreateCommand()
         listTreeCommand,
     };
 
+    var eventWatchCommand = new Command("watch", "Watch UIA events")
+    {
+    };
+    eventWatchCommand.SetAction((parse) =>
+    {
+        Cmd.Commands.EventCommands.WatchEvents();
+    });
+    var eventCommands = new Command("event", "UIA event")
+    {
+        eventWatchCommand,
+    };
+
     var program = new RootCommand("Simple accessibility tools")
     {
         windowsCommands,
         treeCommands,
+        eventCommands,
     };
     return program;
 }

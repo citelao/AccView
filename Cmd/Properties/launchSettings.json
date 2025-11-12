@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Cmd": {
+      "commandName": "Project",
+      "commandLineArgs": "event watch"
+    }
+  }
+}
