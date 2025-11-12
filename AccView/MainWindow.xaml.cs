@@ -34,13 +34,13 @@ namespace AccView
 
         // TODO:
         // [GeneratedDependencyProperty]
-        private bool followKeyboardFocus { get; set; } = false;
+        private bool followKeyboardFocus { get; set; } = true;
 
         private IUIAutomation6 _uia;
         private IUIAutomationCondition _condition;
         private IUIAutomationEventHandlerGroup? _eventHandlerGroup = null;
         private AutomationTreeViewModel avmFactory;
-        private IUIAutomationElement windowUiaElement;
+        private AutomationElementViewModel windowUiaElement;
 
         private class FocusChangedEventHandler : IUIAutomationFocusChangedEventHandler
         {
@@ -67,11 +67,12 @@ namespace AccView
             _uia = UIAHelpers.CreateUIAutomationInstance();
             _condition = _uia.ControlViewCondition;
 
+            avmFactory = new AutomationTreeViewModel(_uia, _condition);
+
             // TODO: ignore all events?
             var hwnd = this.GetWindowHandle();
-            windowUiaElement = _uia.ElementFromHandle(new HWND(hwnd));
-
-            avmFactory = new AutomationTreeViewModel(_uia, _condition);
+            var rawWindowUiaElement = _uia.ElementFromHandle(new HWND(hwnd));
+            windowUiaElement = avmFactory.GetOrCreateNormalized(rawWindowUiaElement);
 
             // https://learn.microsoft.com/en-us/windows/win32/api/uiautomationclient/nn-uiautomationclient-iuiautomationeventhandlergroup
             _uia.CreateEventHandlerGroup(out _eventHandlerGroup);
@@ -118,16 +119,46 @@ namespace AccView
 
         private async void FocusChanged(object sender, FocusChangedEventHandler.FocusChangedEventArgs e)
         {
+            if (!followKeyboardFocus)
+            {
+                // Ignore focus changes.
+                return;
+            }
+
             var focusedElement = e.Element!;
 
             var ogName = focusedElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId) as string;
             var ogLct = focusedElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId) as string;
             var ogRid = AutomationElementViewModel.GetCurrentRuntimeId(focusedElement);
 
-            // TODO: load on non-UI thread?
-            var tempVm = avmFactory.GetOrCreateNormalized(focusedElement);
+            if (ogRid == null)
+            {
+                throw new InvalidOperationException($"RID cannot be null ({ogName} {ogRid})");
+            }
 
             // Find the corresponding view model.
+            var tempVm = avmFactory.GetOrCreateNormalized(focusedElement);
+
+            // Is this the current window?
+            var isInCurrentWindow = false;
+            var parent = tempVm;
+            while (parent != null)
+            {
+                if (windowUiaElement.IsElement(parent))
+                {
+                    isInCurrentWindow = true;
+                    break;
+                }
+                parent = parent.Parent;
+            }
+
+            if (isInCurrentWindow)
+            {
+                // Ignore focus changes in the current window.
+                return;
+            }
+
+            // TODO: better UI thread handling.
             await DispatcherQueue.EnqueueAsync(async () =>
             {
                 // TODO: ignore from current window windowUiaElement

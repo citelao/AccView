@@ -134,7 +134,7 @@ namespace AccView.ViewModels
             }
             _element = element.BuildUpdatedCache(cache);
 
-            Name = (string)_element.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId);
+            Name = (string)_element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId);
             LocalizedControlType = (string)_element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId);
 
             var rect = _element.CachedBoundingRectangle;
@@ -159,6 +159,11 @@ namespace AccView.ViewModels
         public bool IsElement(IUIAutomationElement element)
         {
             return _uia.CompareElements(_element, element);
+        }
+
+        public bool IsElement(AutomationElementViewModel element)
+        {
+            return IsElement(element._element);
         }
 
         private static void MergeChildren(ObservableCollection<AutomationElementViewModel> existingChildren, IList<AutomationElementViewModel> newChildren)
@@ -219,7 +224,7 @@ namespace AccView.ViewModels
         }
 
         public bool IsInvokePatternAvailable => IsPatternAvailable(KnownPattern.All[UIA_PATTERN_ID.UIA_InvokePatternId]);
-            
+
         // TODO: play with this.
         public void Invoke()
         {
