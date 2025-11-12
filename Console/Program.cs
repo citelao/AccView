@@ -1,24 +1,11 @@
 ﻿using Windows.Win32.UI.Accessibility;
 using Shared;
+using System.CommandLine;
 
-//unsafe
-//{
-//    PInvoke.EnumWindows((hwnd, lParam) =>
-//    {
-//        const int maxLength = 256;
-//        Span<char> buffer = stackalloc char[maxLength];
+var program = CreateCommand();
 
-//        fixed (char* pBuffer = buffer)
-//        {
-//            var pwstr = new PWSTR(pBuffer);
-//            int length = PInvoke.GetWindowText(hwnd, pwstr, maxLength);
-//            string title = length > 0 ? new string(pBuffer, 0, length) : string.Empty;
-//            Console.WriteLine($"HWND: 0x{hwnd:X}, Title: '{title}'");
-//        }
-
-//        return true; // continue enumeration
-//    }, IntPtr.Zero);
-//}
+// Execute the command line parser
+return await program.Parse(args).InvokeAsync();
 
 // List all top-level windows with their titles
 var automation = UIAHelpers.CreateUIAutomationInstance();
@@ -41,5 +28,21 @@ for (int i = 0; i < children.Length; i++)
     {
         Console.WriteLine("   + [...]");
     }
+}
 
+static RootCommand CreateCommand()
+{
+    var listWindowsCommand = new Command("list", "List all top-level windows with their titles")
+    {
+    };
+    var windowsCommands = new Command("windows", "HWND tools")
+    {
+        listWindowsCommand,
+    };
+
+    var program = new RootCommand("Simple accessibility tools")
+    {
+        windowsCommands,
+    };
+    return program;
 }
