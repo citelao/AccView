@@ -72,6 +72,12 @@ namespace Cmd.Commands
                 group.AddNotificationEventHandler(TreeScope.TreeScope_Descendants | TreeScope.TreeScope_Element, cache, notificationHandler);
 
                 var rootElement = uia.GetRootElement();
+                var rootName = (string)rootElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId);
+                var rootAutomationId = (string)rootElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId);
+                var rootControlType = (UIA_CONTROLTYPE_ID)rootElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId);
+                var rootLocalizedControlType = (string)rootElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId);
+                Console.WriteLine(Dim($"Root Element: '{rootName}' ({rootLocalizedControlType} [{rootControlType}] - Id='{rootAutomationId}')"));
+
                 uia.AddEventHandlerGroup(rootElement, group);
                 uia.AddFocusChangedEventHandler(cache, focusHandler);
 

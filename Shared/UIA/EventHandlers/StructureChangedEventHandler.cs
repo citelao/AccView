@@ -23,5 +23,6 @@ public class StructureChangedEventHandler : IUIAutomationStructureChangedEventHa
             ChangeType = changeType,
             RuntimeId = id,
         };
+        StructureChanged?.Invoke(this, args);
     }
 }
