@@ -80,10 +80,11 @@
                     <FontIcon Glyph="&#xE8B0;" FontSize="16" />
                 </ToggleButton>
             </Border>
+            <!-- Buggy :( -->
             <ToggleButton
                 Name="FollowKeyboardFocusButton"
                 ToolTipService.ToolTip="Follow keyboard focus"
-                IsChecked="True"
+                IsChecked="False"
                 Click="FollowKeyboardFocus_Click">
                 <FontIcon Glyph="&#xE8AC;" FontSize="16" />
             </ToggleButton>

@@ -11,6 +11,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using Shared;
+using Shared.UIA.EventHandlers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -34,7 +35,7 @@ namespace AccView
 
         // TODO:
         // [GeneratedDependencyProperty]
-        private bool followKeyboardFocus { get; set; } = true;
+        private bool followKeyboardFocus { get; set; } = false;
 
         private IUIAutomation6 _uia;
         private IUIAutomationCondition _condition;
@@ -42,20 +43,6 @@ namespace AccView
         private AutomationTreeViewModel avmFactory;
         private AutomationElementViewModel windowUiaElement;
 
-        private class FocusChangedEventHandler : IUIAutomationFocusChangedEventHandler
-        {
-            public class FocusChangedEventArgs : EventArgs
-            {
-                public IUIAutomationElement? Element { get; set; }
-            }
-
-            public event EventHandler<FocusChangedEventArgs>? FocusChanged;
-
-            public void HandleFocusChangedEvent(IUIAutomationElement sender)
-            {
-                FocusChanged?.Invoke(this, new FocusChangedEventArgs { Element = sender });
-            }
-        }
         private FocusChangedEventHandler _focusChangedHandler = new();
 
         private OverlayWindow? overlayWindow = null;
