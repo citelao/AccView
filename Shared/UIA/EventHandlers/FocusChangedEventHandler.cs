@@ -6,7 +6,7 @@ namespace Shared.UIA.EventHandlers
     {
         public class FocusChangedEventArgs : EventArgs
         {
-            public IUIAutomationElement? Element { get; set; }
+            public required IUIAutomationElement Element { get; set; }
         }
 
         public event EventHandler<FocusChangedEventArgs>? FocusChanged;

@@ -14,7 +14,7 @@ namespace Cmd.Commands
 
             var watcherThread = new Thread(() =>
             {
-                Console.WriteLine("Hi!");
+                Console.WriteLine("Watching for focus changed events. Press Ctrl-C to exit.");
                 var uia = UIAHelpers.CreateUIAutomationInstance();
 
                 var cache = uia.CreateCacheRequest();
@@ -30,9 +30,12 @@ namespace Cmd.Commands
                     var element = e.Element;
                     var name = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId);
                     var automationId = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId);
-                    var controlType = (int)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId);
+                    var controlType = (UIA_CONTROLTYPE_ID)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId);
                     var localizedControlType = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId);
-                    Console.WriteLine($"{Dim(Blue("[Focus]"))} {Green($"'{name}'")} {Dim($"({Green(localizedControlType)} [{controlType}] - Id={Blue($"'{automationId}'")})")}");
+
+                    // 09:54:12.123
+                    var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
+                    Console.WriteLine($"{Dim(timestamp)} {Dim(Blue("[Focus]"))} {Green($"'{name}'")} {Dim($"({Green(localizedControlType)} [{controlType}] - Id='{Blue(automationId)}')")}");
                 };
 
                 uia.AddFocusChangedEventHandler(cache, handler);
@@ -50,14 +53,15 @@ namespace Cmd.Commands
                 exitEvent.Set();
             };
 
+            Console.WriteLine(Dim("Starting watcher..."));
             watcherThread.IsBackground = true;
+            watcherThread.Name = "UIA Event Watcher";
             watcherThread.Start();
-            Console.WriteLine("Watching for focus changed events. Press Ctrl-C to exit.");
 
             // Keep the application running
             exitEvent.WaitOne();
 
-            Console.WriteLine("Waiting for watcher thread to exit...");
+            Console.WriteLine(Dim("Waiting for watcher thread to exit..."));
 
             watcherThread.Join();
         }
