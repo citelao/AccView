@@ -54,7 +54,21 @@ namespace Cmd.Commands
                     var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
                     Console.WriteLine($"{Dim(timestamp)} {Dim(Yellow("[StructureChanged]"))} {Green($"'{name}'")} {Dim($"({Green(localizedControlType)} [{controlType}] - Id='{Blue(automationId)}')")} ChangeType={Yellow(changeType.ToString())}");
                 };
-                group.AddStructureChangedEventHandler(TreeScope.TreeScope_Descendants, cache, structureChangedHandler);
+                group.AddStructureChangedEventHandler(TreeScope.TreeScope_Descendants | TreeScope.TreeScope_Element, cache, structureChangedHandler);
+
+                var notificationHandler = new NotificationEventHandler();
+                notificationHandler.NotificationReceived += (sender, e) =>
+                {
+                    var element = e.Sender;
+                    var name = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId);
+                    var automationId = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId);
+                    var controlType = (UIA_CONTROLTYPE_ID)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId);
+                    var localizedControlType = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId);
+
+                    var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
+                    Console.WriteLine($"{Dim(timestamp)} {Dim(Magenta("[Notification]"))} {Green($"'{name}'")} {Dim($"({Green(localizedControlType)} [{controlType}] - Id='{Blue(automationId)}')")} Kind={Magenta(e.NotificationKind.ToString())} Processing={Magenta(e.NotificationProcessing.ToString())} Message='{e.DisplayString}'");
+                };
+                group.AddNotificationEventHandler(TreeScope.TreeScope_Descendants | TreeScope.TreeScope_Element, cache, notificationHandler);
 
                 var rootElement = uia.GetRootElement();
                 uia.AddEventHandlerGroup(rootElement, group);
