@@ -1,7 +1,7 @@
 ﻿using Windows.Win32;
 using Windows.Win32.Foundation;
 
-namespace Console.Commands
+namespace Cmd.Commands
 {
     public class WindowCommands
     {
@@ -22,7 +22,6 @@ namespace Console.Commands
 
                 return true; // continue enumeration
             }, IntPtr.Zero);
-
         }
     }
 }

@@ -9,6 +9,7 @@
     <InvariantGlobalization>true</InvariantGlobalization>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!--<UseWPF>true</UseWPF>-->
+
   </PropertyGroup>
 
   <ItemGroup>

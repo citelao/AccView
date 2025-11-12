@@ -1,6 +1,7 @@
 ﻿using Windows.Win32.UI.Accessibility;
 using Shared;
 using System.CommandLine;
+using System.CommandLine.Invocation;
 
 var program = CreateCommand();
 
@@ -35,7 +36,11 @@ static RootCommand CreateCommand()
     var listWindowsCommand = new Command("list", "List all top-level windows with their titles")
     {
     };
-    var windowsCommands = new Command("windows", "HWND tools")
+    listWindowsCommand.SetAction((parse) =>
+    {
+        Cmd.Commands.WindowCommands.ListWindows();
+    });
+    var windowsCommands = new Command("window", "HWND tools")
     {
         listWindowsCommand,
     };
