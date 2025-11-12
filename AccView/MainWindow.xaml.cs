@@ -225,7 +225,7 @@ namespace AccView
                 currentNode = applicableChildNode;
 
                 // TODO: testing.
-                await Task.Delay(100);
+                await Task.Delay(1);
             }
 
             ElementsTreeView.SelectedItem = element;
