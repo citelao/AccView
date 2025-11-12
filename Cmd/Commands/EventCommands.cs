@@ -24,8 +24,8 @@ namespace Cmd.Commands
                 cache.AddProperty(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId);
                 cache.AddProperty(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
 
-                var handler = new FocusChangedEventHandler();
-                handler.FocusChanged += (sender, e) =>
+                var focusHandler = new FocusChangedEventHandler();
+                focusHandler.FocusChanged += (sender, e) =>
                 {
                     var element = e.Element;
                     var name = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId);
@@ -38,11 +38,32 @@ namespace Cmd.Commands
                     Console.WriteLine($"{Dim(timestamp)} {Dim(Blue("[Focus]"))} {Green($"'{name}'")} {Dim($"({Green(localizedControlType)} [{controlType}] - Id='{Blue(automationId)}')")}");
                 };
 
-                uia.AddFocusChangedEventHandler(cache, handler);
+                uia.CreateEventHandlerGroup(out var group);
+
+                var structureChangedHandler = new StructureChangedEventHandler();
+                structureChangedHandler.StructureChanged += (sender, e) =>
+                {
+                    var element = e.Sender;
+                    var changeType = e.ChangeType;
+
+                    var name = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId);
+                    var automationId = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId);
+                    var controlType = (UIA_CONTROLTYPE_ID)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId);
+                    var localizedControlType = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId);
+
+                    var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
+                    Console.WriteLine($"{Dim(timestamp)} {Dim(Yellow("[StructureChanged]"))} {Green($"'{name}'")} {Dim($"({Green(localizedControlType)} [{controlType}] - Id='{Blue(automationId)}')")} ChangeType={Yellow(changeType.ToString())}");
+                };
+                group.AddStructureChangedEventHandler(TreeScope.TreeScope_Descendants, cache, structureChangedHandler);
+
+                var rootElement = uia.GetRootElement();
+                uia.AddEventHandlerGroup(rootElement, group);
+                uia.AddFocusChangedEventHandler(cache, focusHandler);
 
                 exitEvent.WaitOne();
 
-                uia.RemoveFocusChangedEventHandler(handler);
+                uia.RemoveFocusChangedEventHandler(focusHandler);
+                uia.RemoveEventHandlerGroup(rootElement, group);
 
                 Console.WriteLine("Done!");
             });

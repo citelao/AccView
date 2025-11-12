@@ -47,29 +47,6 @@ namespace AccView
 
         private FocusChangedEventHandler _focusChangedHandler = new();
 
-        private class StructureChangedHandler : IUIAutomationStructureChangedEventHandler
-        {
-            public struct StructureChangedEventArgs
-            {
-                public required readonly IUIAutomationElement Sender { get; init; }
-                public required readonly StructureChangeType ChangeType { get; init; }
-                public required readonly int[]? RuntimeId { get; init;  }
-            }
-            public event EventHandler<StructureChangedEventArgs>? StructureChanged;
-
-            public unsafe void HandleStructureChangedEvent(IUIAutomationElement sender, StructureChangeType changeType, SAFEARRAY* runtimeId)
-            {
-                // TODO: this is only null when removing elements.
-                int[]? id = null;
-                var args = new StructureChangedEventArgs()
-                {
-                    Sender = sender,
-                    ChangeType = changeType,
-                    RuntimeId = id,
-                };
-            }
-        }
-
         private class NotificationEventHandler : IUIAutomationNotificationEventHandler
         {
             public struct NotificationEventArgs
@@ -96,7 +73,7 @@ namespace AccView
             }
         }
 
-        private StructureChangedHandler _structureChangedHandler = new();
+        private FocusChangedEventHandler _structureChangedHandler = new();
         private NotificationEventHandler _notificationEventHandler = new();
 
         private OverlayWindow? overlayWindow = null;
