@@ -1,6 +1,7 @@
 ﻿using Windows.Win32.UI.Accessibility;
 using Shared;
 using Shared.UIA.EventHandlers;
+using static Crayon.Output;
 
 namespace Cmd.Commands
 {
@@ -31,7 +32,7 @@ namespace Cmd.Commands
                     var automationId = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId);
                     var controlType = (int)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId);
                     var localizedControlType = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId);
-                    Console.WriteLine($"Focus Changed: Name='{name}', AutomationId='{automationId}', ControlType='{controlType}', LocalizedControlType='{localizedControlType}'");
+                    Console.WriteLine($"{Dim(Blue("[Focus]"))} {Green($"'{name}'")} {Dim($"({Green(localizedControlType)} [{controlType}] - Id={Blue($"'{automationId}'")})")}");
                 };
 
                 uia.AddFocusChangedEventHandler(cache, handler);
