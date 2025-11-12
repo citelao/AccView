@@ -18,11 +18,13 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
 using Windows.Win32.UI.Accessibility;
 using WinUIEx;
 
@@ -45,6 +47,32 @@ namespace AccView
 
         private FocusChangedEventHandler _focusChangedHandler = new();
 
+        private class StructureChangedHandler : IUIAutomationStructureChangedEventHandler
+        {
+            // private readonly IUIAutomation6 _uia;
+
+            public struct StructureChangedEventArgs
+            {
+                public required readonly IUIAutomationElement Sender { get; init; }
+                public required readonly StructureChangeType ChangeType { get; init; }
+                public required readonly int[]? RuntimeId { get; init;  }
+            }
+            public event EventHandler<StructureChangedEventArgs>? StructureChanged;
+
+            public unsafe void HandleStructureChangedEvent(IUIAutomationElement sender, StructureChangeType changeType, SAFEARRAY* runtimeId)
+            {
+                // TODO: this is only null when removing elements.
+                int[]? id = null;
+                var args = new StructureChangedEventArgs()
+                {
+                    Sender = sender,
+                    ChangeType = changeType,
+                    RuntimeId = id,
+                };
+            }
+        }
+        private StructureChangedHandler _structureChangedHandler = new();
+
         private OverlayWindow? overlayWindow = null;
 
         public MainWindow(OverlayWindow? window)
@@ -65,7 +93,23 @@ namespace AccView
             _uia.CreateEventHandlerGroup(out _eventHandlerGroup);
 
             // TODO: cache
-            _uia.AddFocusChangedEventHandler(_uia.CreateCacheRequest(), _focusChangedHandler);
+            var simpleInfoCacheRequest = _uia.CreateCacheRequest();
+            simpleInfoCacheRequest.AddProperty(UIA_PROPERTY_ID.UIA_NamePropertyId);
+            simpleInfoCacheRequest.AddProperty(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId);
+            simpleInfoCacheRequest.AddProperty(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId);
+            simpleInfoCacheRequest.AddProperty(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
+            simpleInfoCacheRequest.AddProperty(UIA_PROPERTY_ID.UIA_ControlTypePropertyId);
+
+
+            _uia.AddFocusChangedEventHandler(simpleInfoCacheRequest, _focusChangedHandler);
+
+            //_eventHandlerGroup.AddActiveTextPositionChangedEventHandler();
+            // _eventHandlerGroup.AddAutomationEventHandler()
+            // _eventHandlerGroup.AddChangesEventHandler()
+            //_eventHandlerGroup.AddNotificationEventHandler
+            // _eventHandlerGroup.AddPropertyChangedEventHandler()
+            _eventHandlerGroup.AddStructureChangedEventHandler(TreeScope.TreeScope_Descendants, simpleInfoCacheRequest, _structureChangedHandler);
+            // _eventHandlerGroup.AddTextEditTextChangedEventHandler(TreeScope.TreeScope_Descendants, )
 
             overlayWindow = window;
         }
@@ -75,6 +119,21 @@ namespace AccView
             avmFactory.LoadRoot();
 
             _focusChangedHandler.FocusChanged += FocusChanged;
+            _structureChangedHandler.StructureChanged += StructureChanged;
+        }
+
+        private async void StructureChanged(object? sender, StructureChangedHandler.StructureChangedEventArgs e)
+        {
+            var ogName = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId) as string;
+            var ogId = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId) as string;
+            var ogLct = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId) as string;
+            var ogCt = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId) as int?;
+            var ogRid = AutomationElementViewModel.GetCachedRuntimeId(e.Sender);
+
+            await DispatcherQueue.EnqueueAsync(() =>
+            {
+                OutputTextBlock.Text += $"Structure changed: {e.ChangeType} on element: {ogName} ({ogLct}, {ogId}, {ogCt}, {ogRid})\n";
+            });
         }
 
         private void ElementsTreeView_Expanding(TreeView sender, TreeViewExpandingEventArgs args)
