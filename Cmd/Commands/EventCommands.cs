@@ -68,6 +68,7 @@ namespace Cmd.Commands
                     var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
                     // Console.WriteLine($"{Dim(timestamp)} {Dim(Magenta("[Notification]"))} {Green($"'{name}'")} {Dim($"({Green(localizedControlType)} [{controlType}] - Id='{Blue(automationId)}')")} Kind={Magenta(e.NotificationKind.ToString())} Processing={Magenta(e.NotificationProcessing.ToString())} Message='{e.DisplayString}'");
                     Console.WriteLine($"{Dim(timestamp)} {Dim(Magenta("[Notification]"))} {Green($"'{name}'")} {Dim($"({Green(localizedControlType)} [{controlType}] - Id='{Blue(automationId)}')")} Kind={Magenta(e.NotificationKind.ToString())} Processing={Magenta(e.NotificationProcessing.ToString())} ");
+                    Console.WriteLine(Dim($"    '{e.DisplayString}'"));
                 };
                 group.AddNotificationEventHandler(TreeScope.TreeScope_Descendants | TreeScope.TreeScope_Element, cache, notificationHandler);
 
@@ -80,6 +81,8 @@ namespace Cmd.Commands
 
                 uia.AddEventHandlerGroup(rootElement, group);
                 uia.AddFocusChangedEventHandler(cache, focusHandler);
+                // var properties = new UIA_PROPERTY_ID[] { UIA_PROPERTY_ID.UIA_NamePropertyId };
+                // uia.AddPropertyChangedEventHandlerNativeArray(rootElement, TreeScope.TreeScope_Descendants | TreeScope.TreeScope_Element, cache, null, properties, properties.Length);
 
                 exitEvent.WaitOne();
 
