@@ -99,14 +99,18 @@
                Grid.Column="1">
         </Frame>
 
-        <TextBox
+        <Expander
             Grid.Row="1"
             Grid.Column="1"
-            MaxHeight="100"
-            x:Name="OutputTextBlock"
-            AcceptsReturn="True"
-            VerticalAlignment="Stretch"
-            HorizontalAlignment="Stretch" 
-            Margin="0,8,8,8"/>
+            HorizontalAlignment="Stretch"
+            HorizontalContentAlignment="Stretch"
+            Margin="0,8,8,8">
+            <Expander.Header>Log</Expander.Header>
+            <TextBox
+                x:Name="OutputTextBlock"
+                AcceptsReturn="True"
+                VerticalAlignment="Stretch"
+                HorizontalAlignment="Stretch" />
+        </Expander>
     </Grid>
 </winex:WindowEx>

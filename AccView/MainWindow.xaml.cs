@@ -45,6 +45,8 @@ namespace AccView
         private AutomationTreeViewModel avmFactory;
         private AutomationElementViewModel windowUiaElement;
 
+        private IUIAutomationElement rootWindow;
+
         private FocusChangedEventHandler _focusChangedHandler = new();
         private StructureChangedEventHandler _structureChangedHandler = new();
         private NotificationEventHandler _notificationEventHandler = new();
@@ -64,6 +66,7 @@ namespace AccView
             var hwnd = this.GetWindowHandle();
             var rawWindowUiaElement = _uia.ElementFromHandle(new HWND(hwnd));
             windowUiaElement = avmFactory.GetOrCreateNormalized(rawWindowUiaElement);
+            rootWindow = _uia.GetRootElement();
 
             // https://learn.microsoft.com/en-us/windows/win32/api/uiautomationclient/nn-uiautomationclient-iuiautomationeventhandlergroup
             _uia.CreateEventHandlerGroup(out _eventHandlerGroup);
@@ -114,8 +117,13 @@ namespace AccView
             var ogCt = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId) as int?;
             var ogRid = AutomationElementViewModel.GetCachedRuntimeId(e.Sender);
 
+            var isRoot = _uia.CompareElements(e.Sender, rootWindow);
             await DispatcherQueue.EnqueueAsync(() =>
             {
+                if (isRoot)
+                {
+                    OutputTextBlock.Text += "HI!!\n";
+                }
                 OutputTextBlock.Text += $"Structure changed: {e.ChangeType} on element: {ogName} ({ogLct}, {ogId}, {ogCt}, {ogRid})\n";
             });
         }
