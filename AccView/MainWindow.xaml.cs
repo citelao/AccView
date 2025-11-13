@@ -46,34 +46,7 @@ namespace AccView
         private AutomationElementViewModel windowUiaElement;
 
         private FocusChangedEventHandler _focusChangedHandler = new();
-
-        private class NotificationEventHandler : IUIAutomationNotificationEventHandler
-        {
-            public struct NotificationEventArgs
-            {
-                public required readonly IUIAutomationElement Sender { get; init; }
-                public required readonly NotificationKind NotificationKind { get; init; }
-                public required readonly NotificationProcessing NotificationProcessing { get; init; }
-                public required readonly string DisplayString { get; init; }
-                public required readonly string ActivityId { get; init; }
-            }
-            public event EventHandler<NotificationEventArgs>? NotificationReceived;
-
-            public void HandleNotificationEvent(IUIAutomationElement sender, NotificationKind notificationKind, NotificationProcessing notificationProcessing, BSTR displayString, BSTR activityId)
-            {
-                var args = new NotificationEventArgs()
-                {
-                    Sender = sender,
-                    NotificationKind = notificationKind,
-                    NotificationProcessing = notificationProcessing,
-                    DisplayString = displayString.ToString(),
-                    ActivityId = activityId.ToString(),
-                };
-                NotificationReceived?.Invoke(this, args);
-            }
-        }
-
-        private FocusChangedEventHandler _structureChangedHandler = new();
+        private StructureChangedEventHandler _structureChangedHandler = new();
         private NotificationEventHandler _notificationEventHandler = new();
 
         private OverlayWindow? overlayWindow = null;
@@ -133,7 +106,7 @@ namespace AccView
             _notificationEventHandler.NotificationReceived += NotificationReceived;
         }
 
-        private async void StructureChanged(object? sender, StructureChangedHandler.StructureChangedEventArgs e)
+        private async void StructureChanged(object? sender, StructureChangedEventHandler.StructureChangedEventArgs e)
         {
             var ogName = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId) as string;
             var ogId = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId) as string;
@@ -187,7 +160,7 @@ namespace AccView
             ElementDetail.Navigate(typeof(ElementDetailPage), selectedItem, new SuppressNavigationTransitionInfo());
         }
 
-        private async void FocusChanged(object sender, FocusChangedEventHandler.FocusChangedEventArgs e)
+        private async void FocusChanged(object? sender, FocusChangedEventHandler.FocusChangedEventArgs e)
         {
             var focusedElement = e.Element!;
 
