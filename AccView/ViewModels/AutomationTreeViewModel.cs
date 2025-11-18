@@ -82,7 +82,7 @@ namespace AccView.ViewModels
                 }
 
                 // Load the immediate children for all root elements: this lets us know which ones are expandable.
-                vm.LoadChildren();
+                vm.LoadChildrenAsync();
             }
 
             // Are there more elements?
@@ -191,7 +191,7 @@ namespace AccView.ViewModels
                 var nextUiaElement = ancestors.Pop();
 
                 // This will load all the children, including the next descendant.
-                currentViewModel.LoadChildren();
+                currentViewModel.LoadChildrenAsync();
 
                 var childViewModel = currentViewModel.Children!.FirstOrDefault(vm => vm.IsElement(nextUiaElement));
                 if (childViewModel == null)

@@ -171,7 +171,7 @@ namespace AccView.ViewModels
             CollectionHelpers.UpdateObservableCollection(existingChildren, newChildren, (a, b) => a.IsElement(b._element));
         }
 
-        public void LoadChildren()
+        public async Task LoadChildrenAsync()
         {
             //if (!_dispatcherQueue.HasThreadAccess)
             //{
@@ -187,11 +187,11 @@ namespace AccView.ViewModels
                 childVMs.Add(childViewModel);
             }
 
-            // TODO: bad.
-            _dispatcherQueue.EnqueueAsync(() =>
+            // TODO: I don't like jumping between the UI thread.
+            await _dispatcherQueue.EnqueueAsync(() =>
             {
                 MergeChildren(Children, childVMs);
-            }).GetAwaiter().GetResult();
+            });
         }
 
         public void LoadDetailedProperties()
