@@ -118,13 +118,14 @@ namespace AccView
             var ogRid = AutomationElementViewModel.GetCachedRuntimeId(e.Sender);
 
             var isRoot = _uia.CompareElements(e.Sender, rootWindow);
+
             await DispatcherQueue.EnqueueAsync(() =>
             {
                 if (isRoot)
                 {
-                    OutputTextBlock.Text += "HI!!\n";
+                    LogOutput("Structure changed event on root element");
                 }
-                OutputTextBlock.Text += $"Structure changed: {e.ChangeType} on element: {ogName} ({ogLct}, {ogId}, {ogCt}, {ogRid})\n";
+                LogOutput($"Structure changed: {e.ChangeType} on element: {ogName} ({ogLct}, {ogId}, {ogCt}, {ogRid})");
             });
         }
 
@@ -137,7 +138,7 @@ namespace AccView
             var ogRid = AutomationElementViewModel.GetCachedRuntimeId(e.Sender);
             await DispatcherQueue.EnqueueAsync(() =>
             {
-                OutputTextBlock.Text += $"Notification received: {e.NotificationKind} / {e.NotificationProcessing} on element: {ogName} ({ogLct}, {ogId}, {ogCt}, {ogRid})\n\t{e.DisplayString}\n";
+                LogOutput($"Notification received: {e.NotificationKind} / {e.NotificationProcessing} on element: {ogName} ({ogLct}, {ogId}, {ogCt}, {ogRid})\n\t{e.DisplayString}");
             });
         }
 
@@ -179,7 +180,7 @@ namespace AccView
             // Temp:
             await DispatcherQueue.EnqueueAsync(() =>
             {
-                OutputTextBlock.Text += $"Focus changed event received for element: {ogName} ({ogLct}, {ogRid})\n";
+                LogOutput($"Focus changed event received for element: {ogName} ({ogLct}, {ogRid})");
             });
 
             if (!followKeyboardFocus)
@@ -220,8 +221,8 @@ namespace AccView
             {
                 // TODO: ignore from current window windowUiaElement
 
-                OutputTextBlock.Text += $"\nFocus changed to element: {tempVm.Name} ({tempVm.LocalizedControlType}, {tempVm.RuntimeIdString})";
-                OutputTextBlock.Text += $"\n\t{ogName} ({ogLct}, {ogRid})";
+                LogOutput($"Focus changed to element: {tempVm.Name} ({tempVm.LocalizedControlType}, {tempVm.RuntimeIdString})");
+                LogOutput($"\t{ogName} ({ogLct}, {ogRid})");
 
                 await JumpToNodeAsync(tempVm);
             });
@@ -314,6 +315,17 @@ namespace AccView
         {
             var newValue = FollowKeyboardFocusButton.IsChecked ?? false;
             followKeyboardFocus = newValue;
+        }
+
+        private void LogOutput(string message)
+        {
+            if (!DispatcherQueue.HasThreadAccess)
+            {
+                throw new InvalidOperationException("LogOutput must be called on the UI thread.");
+            }
+
+            OutputExpander.Header = message;
+            OutputTextBlock.Text += message + "\n";
         }
     }
 }
