@@ -2,6 +2,7 @@
 using Shared;
 using Shared.UIA.EventHandlers;
 using static Crayon.Output;
+using Windows.Win32;
 
 namespace Cmd.Commands
 {
@@ -23,6 +24,21 @@ namespace Cmd.Commands
                 cache.AddProperty(UIA_PROPERTY_ID.UIA_ControlTypePropertyId);
                 cache.AddProperty(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId);
                 cache.AddProperty(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
+
+                IUIAutomationElement? consoleUiaElement = null;
+                var windowHandle = PInvoke.GetConsoleWindow();
+                if (windowHandle == IntPtr.Zero)
+                {
+                    Console.WriteLine(Red("Failed to get console window handle."));
+                }
+                else
+                {
+                    consoleUiaElement = uia.ElementFromHandle(windowHandle);
+                    if (consoleUiaElement == null)
+                    {
+                        Console.WriteLine(Red("Failed to get UIA element from console window handle."));
+                    }
+                }
 
                 var focusHandler = new FocusChangedEventHandler();
                 focusHandler.FocusChanged += (sender, e) =>
@@ -60,6 +76,27 @@ namespace Cmd.Commands
                 notificationHandler.NotificationReceived += (sender, e) =>
                 {
                     var element = e.Sender;
+
+                    // Avoid notifications from children of our own console window
+                    if (consoleUiaElement != null)
+                    {
+                        var consoleRuntimeId = (int[])consoleUiaElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
+                        var bound = consoleUiaElement.CurrentBoundingRectangle;
+                        var currentAncestor = element;
+                        var walker = uia.RawViewWalker;
+                        while (currentAncestor != null)
+                        {
+                            var ancestorRuntimeId = (int[])currentAncestor.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
+                            Console.WriteLine($"ancestor: {string.Join(",", ancestorRuntimeId)} {currentAncestor.CurrentLocalizedControlType} vs {consoleUiaElement.CurrentLocalizedControlType} {string.Join(",", consoleRuntimeId)} {bound.left},{bound.top},{bound.right},{bound.bottom}");
+                            if (uia.CompareElements(currentAncestor, consoleUiaElement))
+                            {
+                                // Ignoring notification from console window
+                                return;
+                            }
+                            currentAncestor = walker.GetParentElement(currentAncestor);
+                        }
+                    }
+
                     var name = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId);
                     var automationId = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId);
                     var controlType = (UIA_CONTROLTYPE_ID)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId);
