@@ -112,10 +112,10 @@ namespace AccView
 
         private async void StructureChanged(object? sender, StructureChangedEventHandler.StructureChangedEventArgs e)
         {
-            var ogName = e.Sender.GetCachedPropertyValueVariant(UIA_PROPERTY_ID.UIA_NamePropertyId).As<string>() ?? string.Empty;
-            var ogId = e.Sender.GetCachedPropertyValueVariant(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId).As<string>() ?? string.Empty;
-            var ogLct = e.Sender.GetCachedPropertyValueVariant(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId).As<string>() ?? string.Empty;
-            var ogCt = e.Sender.GetCachedPropertyValueVariant(UIA_PROPERTY_ID.UIA_ControlTypePropertyId).As<UIA_CONTROLTYPE_ID>();
+            var ogName = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId).As<string>() ?? string.Empty;
+            var ogId = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId).As<string>() ?? string.Empty;
+            var ogLct = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId).As<string>() ?? string.Empty;
+            var ogCt = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId).As<UIA_CONTROLTYPE_ID>();
             var ogRid = AutomationElementViewModel.GetCachedRuntimeId(e.Sender);
 
             var isRoot = _uia.CompareElements(e.Sender, rootWindow);
@@ -132,10 +132,10 @@ namespace AccView
 
         private async void NotificationReceived(object? sender, NotificationEventHandler.NotificationEventArgs e)
         {
-            var ogName = e.Sender.GetCachedPropertyValueVariant(UIA_PROPERTY_ID.UIA_NamePropertyId).As<string>() ?? string.Empty;
-            var ogId = e.Sender.GetCachedPropertyValueVariant(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId).As<string>() ?? string.Empty;
-            var ogLct = e.Sender.GetCachedPropertyValueVariant(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId).As<string>() ?? string.Empty;
-            var ogCt = e.Sender.GetCachedPropertyValueVariant(UIA_PROPERTY_ID.UIA_ControlTypePropertyId).As<UIA_CONTROLTYPE_ID>();
+            var ogName = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId).As<string>() ?? string.Empty;
+            var ogId = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId).As<string>() ?? string.Empty;
+            var ogLct = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId).As<string>() ?? string.Empty;
+            var ogCt = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId).As<UIA_CONTROLTYPE_ID>();
             var ogRid = AutomationElementViewModel.GetCachedRuntimeId(e.Sender);
             await DispatcherQueue.EnqueueAsync(() =>
             {
@@ -174,8 +174,8 @@ namespace AccView
         {
             var focusedElement = e.Element!;
 
-            var ogName = focusedElement.GetCachedPropertyValueVariant(UIA_PROPERTY_ID.UIA_NamePropertyId).As<string>() ?? string.Empty;
-            var ogLct = focusedElement.GetCachedPropertyValueVariant(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId).As<string>() ?? string.Empty;
+            var ogName = focusedElement.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId).As<string>() ?? string.Empty;
+            var ogLct = focusedElement.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId).As<string>() ?? string.Empty;
             var ogRid = AutomationElementViewModel.GetCachedRuntimeId(focusedElement);
 
             // Temp:

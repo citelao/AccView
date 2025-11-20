@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices.Marshalling;
 using System.Runtime.Versioning;
 using Windows.Win32;
-using Windows.Win32.System.Variant;
 using Windows.Win32.UI.Accessibility;
 
 namespace Shared
@@ -36,21 +35,6 @@ namespace Shared
         public static IUIAutomation5 CreateUIAutomation5Instance()
         {
             return CreateInstance<IUIAutomation5>(typeof(CUIAutomation));
-        }
-    }
-
-    public static class UIAExtensions
-    {
-        public unsafe static ComVariant GetCachedPropertyValueVariant(this IUIAutomationElement element, UIA_PROPERTY_ID propertyId)
-        {
-            VARIANT v = element.GetCachedPropertyValue(propertyId);
-            return (*(ComVariant*)&v);
-        }
-
-        public unsafe static ComVariant GetCurrentPropertyValueVariant(this IUIAutomationElement element, UIA_PROPERTY_ID propertyId)
-        {
-            VARIANT v = element.GetCurrentPropertyValue(propertyId);
-            return (*(ComVariant*)&v);
         }
     }
 }
