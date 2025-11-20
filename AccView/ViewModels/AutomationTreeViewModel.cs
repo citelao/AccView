@@ -53,7 +53,7 @@ namespace AccView.ViewModels
         {
             var root = uia.GetRootElement();
             var children = root.FindAllBuildCache(TreeScope.TreeScope_Children, TreeCondition, runtimeIdOnlyRequest);
-            for (int i = 0; i < children.Length; i++)
+            for (int i = 0; i < children.get_Length(); i++)
             {
                 var element = children.GetElement(i);
                 var runtimeId = AutomationElementViewModel.GetCachedRuntimeId(element);
@@ -82,14 +82,14 @@ namespace AccView.ViewModels
                 }
 
                 // Load the immediate children for all root elements: this lets us know which ones are expandable.
-                vm.LoadChildrenAsync();
+                _ = vm.LoadChildrenAsync();
             }
 
             // Are there more elements?
-            if (Tree.Count > children.Length)
+            if (Tree.Count > children.get_Length())
             {
                 // Remove the excess elements.
-                for (int i = Tree.Count - 1; i >= children.Length; i--)
+                for (int i = Tree.Count - 1; i >= children.get_Length(); i--)
                 {
                     var vmToRemove = Tree[i];
                     Tree.RemoveAt(i);
@@ -191,7 +191,7 @@ namespace AccView.ViewModels
                 var nextUiaElement = ancestors.Pop();
 
                 // This will load all the children, including the next descendant.
-                currentViewModel.LoadChildrenAsync();
+                _ = currentViewModel.LoadChildrenAsync();
 
                 var childViewModel = currentViewModel.Children!.FirstOrDefault(vm => vm.IsElement(nextUiaElement));
                 if (childViewModel == null)

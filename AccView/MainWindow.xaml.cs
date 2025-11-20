@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.Com;
 using Windows.Win32.UI.Accessibility;
@@ -58,7 +59,7 @@ namespace AccView
             InitializeComponent();
 
             _uia = UIAHelpers.CreateUIAutomationInstance();
-            _condition = _uia.ControlViewCondition;
+            _condition = _uia.get_ControlViewCondition();
 
             avmFactory = new AutomationTreeViewModel(_uia, _condition);
 
@@ -111,10 +112,10 @@ namespace AccView
 
         private async void StructureChanged(object? sender, StructureChangedEventHandler.StructureChangedEventArgs e)
         {
-            var ogName = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId) as string;
-            var ogId = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId) as string;
-            var ogLct = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId) as string;
-            var ogCt = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId) as int?;
+            var ogName = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId).As<string>() ?? string.Empty;
+            var ogId = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId).As<string>() ?? string.Empty;
+            var ogLct = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId).As<string>() ?? string.Empty;
+            var ogCt = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId).As<UIA_CONTROLTYPE_ID>();
             var ogRid = AutomationElementViewModel.GetCachedRuntimeId(e.Sender);
 
             var isRoot = _uia.CompareElements(e.Sender, rootWindow);
@@ -131,10 +132,10 @@ namespace AccView
 
         private async void NotificationReceived(object? sender, NotificationEventHandler.NotificationEventArgs e)
         {
-            var ogName = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId) as string;
-            var ogId = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId) as string;
-            var ogLct = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId) as string;
-            var ogCt = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId) as int?;
+            var ogName = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId).As<string>() ?? string.Empty;
+            var ogId = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId).As<string>() ?? string.Empty;
+            var ogLct = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId).As<string>() ?? string.Empty;
+            var ogCt = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId).As<UIA_CONTROLTYPE_ID>();
             var ogRid = AutomationElementViewModel.GetCachedRuntimeId(e.Sender);
             await DispatcherQueue.EnqueueAsync(() =>
             {
@@ -153,13 +154,13 @@ namespace AccView
             // Load all children, then load their children as well (so that the expander shows up)
             if (expandingItem.Children == null)
             {
-                expandingItem.LoadChildren();
+                _ = expandingItem.LoadChildrenAsync();
 
             }
 
             foreach (var child in expandingItem.Children ?? [])
             {
-                child.LoadChildren();
+                _ = child.LoadChildrenAsync();
             }
         }
 
@@ -173,8 +174,8 @@ namespace AccView
         {
             var focusedElement = e.Element!;
 
-            var ogName = focusedElement.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId) as string;
-            var ogLct = focusedElement.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId) as string;
+            var ogName = focusedElement.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId).As<string>() ?? string.Empty;
+            var ogLct = focusedElement.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId).As<string>() ?? string.Empty;
             var ogRid = AutomationElementViewModel.GetCachedRuntimeId(focusedElement);
 
             // Temp:
