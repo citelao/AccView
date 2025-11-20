@@ -126,8 +126,8 @@ namespace AccView.ViewModels
             var cache = BuildDefaultCacheRequest(uia);
             _element = element.BuildUpdatedCache(cache);
 
-            Name = _element.GetCachedPropertyValueVariant(UIA_PROPERTY_ID.UIA_NamePropertyId).As<string>() ?? string.Empty;
-            LocalizedControlType = _element.GetCachedPropertyValueVariant(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId).As<string>() ?? string.Empty;
+            Name = _element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId).As<string>() ?? string.Empty;
+            LocalizedControlType = _element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId).As<string>() ?? string.Empty;
 
             var rect = _element.get_CachedBoundingRectangle();
             BoundingRect = new Rectangle(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
@@ -140,12 +140,12 @@ namespace AccView.ViewModels
 
         public static RuntimeIdT GetCachedRuntimeId(IUIAutomationElement element)
         {
-            return element.GetCachedPropertyValueVariant(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId).As<RuntimeIdT>()!;
+            return element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId).As<RuntimeIdT>()!;
         }
 
         public static RuntimeIdT GetCurrentRuntimeId(IUIAutomationElement element)
         {
-            return element.GetCurrentPropertyValueVariant(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId).As<RuntimeIdT>()!;
+            return element.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId).As<RuntimeIdT>()!;
         }
 
         public static IUIAutomationCacheRequest BuildDefaultCacheRequest(IUIAutomation uia)
