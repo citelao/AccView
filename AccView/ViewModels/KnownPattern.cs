@@ -1,8 +1,11 @@
-﻿using System;
+﻿using Shared;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Runtime.InteropServices;
+using Windows.Win32.System.Variant;
 using Windows.Win32.UI.Accessibility;
 
 namespace AccView.ViewModels
@@ -58,10 +61,10 @@ namespace AccView.ViewModels
         /// </summary>
         public bool CachedIsAvailable(IUIAutomationElement element)
         {
-            var availableObj = element.GetCachedPropertyValue(IsAvailableId);
-            if (availableObj is bool available)
+            var availableObj = element.GetCachedPropertyValueVariant(IsAvailableId);
+            if (availableObj.VarType == VarEnum.VT_BOOL)
             {
-                return available;
+                return availableObj.As<bool>();
             }
             return false;
         }

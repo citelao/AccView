@@ -1,9 +1,11 @@
+using System.Runtime.InteropServices.Marshalling;
 using Windows.Win32.System.Com;
 using Windows.Win32.UI.Accessibility;
 
 namespace Shared.UIA.EventHandlers;
 
-public class StructureChangedEventHandler : IUIAutomationStructureChangedEventHandler
+[GeneratedComClass]
+public partial class StructureChangedEventHandler : IUIAutomationStructureChangedEventHandler
 {
     public struct StructureChangedEventArgs
     {
