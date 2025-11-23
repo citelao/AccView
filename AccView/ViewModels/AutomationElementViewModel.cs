@@ -183,7 +183,7 @@ namespace AccView.ViewModels
             for (int i = 0; i < children.Length; i++)
             {
                 var childElement = children.GetElement(i);
-                var childViewModel = _factory.GetOrCreateNormalizedWithKnownParent(childElement, parent: this);
+                var childViewModel = await _factory.GetOrCreateNormalizedWithKnownParent(childElement, parent: this);
                 childVMs.Add(childViewModel);
             }
 

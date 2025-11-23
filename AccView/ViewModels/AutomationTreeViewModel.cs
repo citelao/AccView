@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.WinUI;
 using Microsoft.UI.Dispatching;
+using Shared;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -32,9 +33,10 @@ namespace AccView.ViewModels
 
         private IUIAutomationCacheRequest runtimeIdOnlyRequest;
 
-        private Microsoft.UI.Dispatching.DispatcherQueue dispatcherQueue;
+        private Microsoft.UI.Dispatching.DispatcherQueue uiDispatcher;
+        private SingleThreadedTaskScheduler uiaScheduler;
 
-        public AutomationTreeViewModel(IUIAutomation6 uia, IUIAutomationCondition walkerCondition)
+        public AutomationTreeViewModel(IUIAutomation6 uia, IUIAutomationCondition walkerCondition, SingleThreadedTaskScheduler uiaScheduler)
         {
             this.uia = uia;
             this.TreeCondition = walkerCondition;
@@ -43,60 +45,51 @@ namespace AccView.ViewModels
             runtimeIdOnlyRequest = uia.CreateCacheRequest();
             runtimeIdOnlyRequest.AddProperty(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
 
-            dispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+            this.uiDispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+            this.uiaScheduler = uiaScheduler;
         }
 
         /// <summary>
         /// Load all the root elements, like windows. Should probably be your first call.
         /// </summary>
-        public void LoadRoot()
+        public async Task LoadRootAsync()
         {
-            var root = uia.GetRootElement();
-            var children = root.FindAllBuildCache(TreeScope.TreeScope_Children, TreeCondition, runtimeIdOnlyRequest);
-            for (int i = 0; i < children.Length; i++)
+            var childrenVMs = await uiaScheduler.Schedule(async () =>
             {
-                var element = children.GetElement(i);
-                var runtimeId = AutomationElementViewModel.GetCachedRuntimeId(element);
-
-                AutomationElementViewModel vm;
-                if (cache.TryGetValue(runtimeId, out var existingViewModel))
+                var root = uia.GetRootElement();
+                var children = root.FindAllBuildCache(TreeScope.TreeScope_Children, TreeCondition, runtimeIdOnlyRequest);
+                var childrenVMs = new List<AutomationElementViewModel>();
+                for (int i = 0; i < children.Length; i++)
                 {
-                    // If we already have a ViewModel for this element, use it.
-                    vm = existingViewModel;
+                    var element = children.GetElement(i);
+                    var runtimeId = AutomationElementViewModel.GetCachedRuntimeId(element);
 
-                    // Move it to the current position in the tree if needed.
-                    var currentIndex = Tree.IndexOf(vm);
-                    if (currentIndex != i)
+                    AutomationElementViewModel vm;
+                    if (cache.TryGetValue(runtimeId, out var existingViewModel))
                     {
-                        Tree.Move(currentIndex, i);
+                        // If we already have a ViewModel for this element, use it.
+                        vm = existingViewModel;
                     }
+                    else
+                    {
+                        // Otherwise, create a new ViewModel.
+                        vm = new AutomationElementViewModel(uia, element, parent: null, factory: this, dispatcherQueue: uiDispatcher);
+                        cache[runtimeId] = vm;
+                    }
+
+                    childrenVMs.Add(vm);
+
+                    // Load the immediate children for all root elements: this lets us know which ones are expandable.
+                    await vm.LoadChildrenAsync();
                 }
-                else
-                {
-                    // Otherwise, create a new ViewModel.
-                    vm = new AutomationElementViewModel(uia, element, parent: null, factory: this, dispatcherQueue: dispatcherQueue);
-                    cache[runtimeId] = vm;
 
-                    // Insert it at the current position.
-                    Tree.Insert(i, vm);
-                }
+                return childrenVMs;
+            });
 
-                // Load the immediate children for all root elements: this lets us know which ones are expandable.
-                vm.LoadChildrenAsync();
-            }
-
-            // Are there more elements?
-            if (Tree.Count > children.Length)
+            await uiDispatcher.EnqueueAsync(() =>
             {
-                // Remove the excess elements.
-                for (int i = Tree.Count - 1; i >= children.Length; i--)
-                {
-                    var vmToRemove = Tree[i];
-                    Tree.RemoveAt(i);
-                    var runtimeIdToRemove = vmToRemove.RuntimeId;
-                    cache.Remove(runtimeIdToRemove);
-                }
-            }
+                CollectionHelpers.UpdateObservableCollection(Tree, childrenVMs);
+            });
         }
 
         /// <summary>
@@ -105,104 +98,104 @@ namespace AccView.ViewModels
         /// <param name="element"></param>
         /// <param name="parent"></param>
         /// <returns></returns>
-        public AutomationElementViewModel GetOrCreateNormalizedWithKnownParent(IUIAutomationElement element, AutomationElementViewModel? parent)
+        public async Task<AutomationElementViewModel> GetOrCreateNormalizedWithKnownParent(IUIAutomationElement element, AutomationElementViewModel? parent)
         {
-            var runtimeId = AutomationElementViewModel.GetCurrentRuntimeId(element);
-            if (cache.TryGetValue(runtimeId, out var existingViewModel))
+            return await uiaScheduler.Schedule(() =>
             {
-                return existingViewModel;
-            }
-
-            // Try once more, normalized.
-            var normalizedElement = treeWalker.NormalizeElementBuildCache(element, runtimeIdOnlyRequest);
-            runtimeId = AutomationElementViewModel.GetCachedRuntimeId(normalizedElement);
-            if (cache.TryGetValue(runtimeId, out existingViewModel))
-            {
-                return existingViewModel;
-            }
-
-            // If not found, create it.
-            // Create all ViewModels on the UI thread.
-            //if (!dispatcherQueue.HasThreadAccess)
-            //{
-            //    throw new InvalidOperationException("GetOrCreateNormalizedWithKnownParent must be called on the UI thread.");
-            //}
-
-            var newViewModel = new AutomationElementViewModel(uia, normalizedElement, parent: parent, factory: this, dispatcherQueue: dispatcherQueue);
-            cache[runtimeId] = newViewModel;
-
-            return newViewModel;
-        }
-
-        public AutomationElementViewModel GetOrCreateNormalized(IUIAutomationElement element)
-        {
-            // Do we already have it?
-            var runtimeId = AutomationElementViewModel.GetCurrentRuntimeId(element);
-            if (cache.TryGetValue(runtimeId, out var existingViewModel))
-            {
-                return existingViewModel;
-            }
-
-            // Try once more, normalized.
-            var normalizedElement = treeWalker.NormalizeElementBuildCache(element, runtimeIdOnlyRequest);
-            runtimeId = AutomationElementViewModel.GetCachedRuntimeId(normalizedElement);
-            if (cache.TryGetValue(runtimeId, out existingViewModel))
-            {
-                return existingViewModel;
-            }
-
-            // If not found, create it along with its parents.
-            // Find all applicable ancestors.
-            var ancestors = new Stack<IUIAutomationElement>();
-            var current = normalizedElement;
-            while (current != null)
-            {
-                ancestors.Push(current);
-                current = treeWalker.GetParentElementBuildCache(current, runtimeIdOnlyRequest);
-            }
-
-            var rootUiaElement = ancestors.Pop();
-            var isRoot = uia.CompareElements(uia.GetRootElement(), rootUiaElement);
-            if (!isRoot)
-            {
-                throw new InvalidOperationException("Could not find root element.");
-            }
-
-            // Now walk down the tree to find the corresponding view model.
-            var rootWindowUiaElement = ancestors.Pop();
-            var rootViewModel = Tree.FirstOrDefault(vm => vm.IsElement(rootWindowUiaElement));
-            if (rootViewModel == null)
-            {
-                // If the root window view model doesn't exist yet, create it (it may be a new window).
-                var newViewModel = new AutomationElementViewModel(uia, rootWindowUiaElement, parent: null, factory: this, dispatcherQueue: dispatcherQueue);
-                cache[runtimeId] = newViewModel;
-                rootViewModel = newViewModel;
-
-                // TODO: add to the correct position in the tree?
-                dispatcherQueue.EnqueueAsync(() =>
+                var runtimeId = AutomationElementViewModel.GetCurrentRuntimeId(element);
+                if (cache.TryGetValue(runtimeId, out var existingViewModel))
                 {
-                    Tree.Add(newViewModel);
-                }).GetAwaiter().GetResult();
-            }
-
-            var currentViewModel = rootViewModel;
-            while (ancestors.Count > 0)
-            {
-                var nextUiaElement = ancestors.Pop();
-
-                // This will load all the children, including the next descendant.
-                currentViewModel.LoadChildrenAsync();
-
-                var childViewModel = currentViewModel.Children!.FirstOrDefault(vm => vm.IsElement(nextUiaElement));
-                if (childViewModel == null)
-                {
-                    throw new InvalidOperationException("Could not find child element in the accessibility tree.");
+                    return existingViewModel;
                 }
 
-                currentViewModel = childViewModel;
-            }
+                // Try once more, normalized.
+                var normalizedElement = treeWalker.NormalizeElementBuildCache(element, runtimeIdOnlyRequest);
+                runtimeId = AutomationElementViewModel.GetCachedRuntimeId(normalizedElement);
+                if (cache.TryGetValue(runtimeId, out existingViewModel))
+                {
+                    return existingViewModel;
+                }
 
-            return currentViewModel;
+                // If not found, create it.
+                var newViewModel = new AutomationElementViewModel(uia, normalizedElement, parent: parent, factory: this, dispatcherQueue: uiDispatcher);
+                cache[runtimeId] = newViewModel;
+
+                return newViewModel;
+            });
+        }
+
+        public async Task<AutomationElementViewModel> GetOrCreateNormalized(IUIAutomationElement element)
+        {
+            return await uiaScheduler.Schedule(async () =>
+            {
+                // Do we already have it?
+                var runtimeId = AutomationElementViewModel.GetCurrentRuntimeId(element);
+                if (cache.TryGetValue(runtimeId, out var existingViewModel))
+                {
+                    return existingViewModel;
+                }
+
+                // Try once more, normalized.
+                var normalizedElement = treeWalker.NormalizeElementBuildCache(element, runtimeIdOnlyRequest);
+                runtimeId = AutomationElementViewModel.GetCachedRuntimeId(normalizedElement);
+                if (cache.TryGetValue(runtimeId, out existingViewModel))
+                {
+                    return existingViewModel;
+                }
+
+                // If not found, create it along with its parents.
+                // Find all applicable ancestors.
+                var ancestors = new Stack<IUIAutomationElement>();
+                var current = normalizedElement;
+                while (current != null)
+                {
+                    ancestors.Push(current);
+                    current = treeWalker.GetParentElementBuildCache(current, runtimeIdOnlyRequest);
+                }
+
+                var rootUiaElement = ancestors.Pop();
+                var isRoot = uia.CompareElements(uia.GetRootElement(), rootUiaElement);
+                if (!isRoot)
+                {
+                    throw new InvalidOperationException("Could not find root element.");
+                }
+
+                // Now walk down the tree to find the corresponding view model.
+                var rootWindowUiaElement = ancestors.Pop();
+                var rootViewModel = Tree.FirstOrDefault(vm => vm.IsElement(rootWindowUiaElement));
+                if (rootViewModel == null)
+                {
+                    // If the root window view model doesn't exist yet, create it (it may be a new window).
+                    var newViewModel = new AutomationElementViewModel(uia, rootWindowUiaElement, parent: null, factory: this, dispatcherQueue: uiDispatcher);
+                    cache[runtimeId] = newViewModel;
+                    rootViewModel = newViewModel;
+
+                    // TODO: add to the correct position in the tree?
+                    await uiDispatcher.EnqueueAsync(() =>
+                    {
+                        Tree.Add(newViewModel);
+                    });
+                }
+
+                var currentViewModel = rootViewModel;
+                while (ancestors.Count > 0)
+                {
+                    var nextUiaElement = ancestors.Pop();
+
+                    // This will load all the children, including the next descendant.
+                    await currentViewModel.LoadChildrenAsync();
+
+                    var childViewModel = currentViewModel.Children!.FirstOrDefault(vm => vm.IsElement(nextUiaElement));
+                    if (childViewModel == null)
+                    {
+                        throw new InvalidOperationException("Could not find child element in the accessibility tree.");
+                    }
+
+                    currentViewModel = childViewModel;
+                }
+
+                return currentViewModel;
+            });
         }
 
         //public void Remove(AutomationElementViewModel element)

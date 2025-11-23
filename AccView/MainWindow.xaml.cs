@@ -19,6 +19,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Windows.Foundation;
@@ -60,13 +61,13 @@ namespace AccView
             _uia = UIAHelpers.CreateUIAutomationInstance();
             _condition = _uia.ControlViewCondition;
 
-            avmFactory = new AutomationTreeViewModel(_uia, _condition);
-
-            // TODO: ignore all events?
-            var hwnd = this.GetWindowHandle();
-            var rawWindowUiaElement = _uia.ElementFromHandle(new HWND(hwnd));
-            windowUiaElement = avmFactory.GetOrCreateNormalized(rawWindowUiaElement);
-            rootWindow = _uia.GetRootElement();
+            // NOTE: theoretically, any call to UIA can interact with our UI
+            // thread, so it cannot be done on the UI thread (it'll hang). So we
+            // use a dedicated thread for most calls. But in practice it's safe
+            // to call UIA wherever, as long as you don't interact with your own
+            // window.
+            var uiaScheduler = new SingleThreadedTaskScheduler(CancellationToken.None);
+            avmFactory = new AutomationTreeViewModel(_uia, _condition, uiaScheduler);
 
             // https://learn.microsoft.com/en-us/windows/win32/api/uiautomationclient/nn-uiautomationclient-iuiautomationeventhandlergroup
             _uia.CreateEventHandlerGroup(out _eventHandlerGroup);
@@ -94,9 +95,15 @@ namespace AccView
             overlayWindow = window;
         }
 
-        private void Grid_Loaded(object sender, RoutedEventArgs e)
+        private async void Grid_Loaded(object sender, RoutedEventArgs e)
         {
-            avmFactory.LoadRoot();
+            await avmFactory.LoadRootAsync();
+
+            // TODO: ignore all events?
+            var hwnd = this.GetWindowHandle();
+            var rawWindowUiaElement = _uia.ElementFromHandle(new HWND(hwnd));
+            windowUiaElement = await avmFactory.GetOrCreateNormalized(rawWindowUiaElement);
+            rootWindow = _uia.GetRootElement();
 
             // TODO: hook up event handlers
             //foreach (var root in AccessibilityTree)
@@ -153,13 +160,13 @@ namespace AccView
             // Load all children, then load their children as well (so that the expander shows up)
             if (expandingItem.Children == null)
             {
-                expandingItem.LoadChildren();
+                expandingItem.LoadChildrenAsync();
 
             }
 
             foreach (var child in expandingItem.Children ?? [])
             {
-                child.LoadChildren();
+                child.LoadChildrenAsync();
             }
         }
 
@@ -195,7 +202,7 @@ namespace AccView
             }
 
             // Find the corresponding view model.
-            var tempVm = avmFactory.GetOrCreateNormalized(focusedElement);
+            var tempVm = await avmFactory.GetOrCreateNormalized(focusedElement);
 
             // Is this the current window?
             var isInCurrentWindow = false;
@@ -235,7 +242,7 @@ namespace AccView
 
             var rawElement = _uia.ElementFromPoint(point);
 
-            var element = avmFactory.GetOrCreateNormalized(rawElement);
+            var element = await avmFactory.GetOrCreateNormalized(rawElement);
 
             await Task.Delay(100);
 
