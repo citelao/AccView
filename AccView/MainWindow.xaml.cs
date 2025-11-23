@@ -127,13 +127,23 @@ namespace AccView
 
                 var isRoot = _uia.CompareElements(e.Sender, rootWindow);
 
-                // DON'T await.
+                // DON'T await. Don't block the UIA threads on the UI.
                 DispatcherQueue.EnqueueAsync(async () =>
                 {
-                    var vm = await avmFactory.GetOrCreateNormalized(e.Sender);
-                    if (vm.IsDescendant(windowUiaElement))
+                    // TODO: try to avoid crashes
+                    //if (e.ChangeType != StructureChangeType.StructureChangeType_ChildRemoved && e.ChangeType != StructureChangeType.StructureChangeType_ChildrenBulkRemoved)
+                    try
                     {
-                        return;
+                        var vm = await avmFactory.GetOrCreateNormalized(e.Sender);
+                        if (vm.IsDescendant(windowUiaElement))
+                        {
+                            return;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // TODO: wayyyy too broad.
+                        //element could have been removed.
                     }
 
                     if (isRoot)
