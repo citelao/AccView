@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Security.Cryptography;
 using System.Threading;
@@ -111,7 +112,7 @@ namespace AccView
             _notificationEventHandler.NotificationReceived += NotificationReceived;
         }
 
-        private async void StructureChanged(object? sender, StructureChangedEventHandler.StructureChangedEventArgs e)
+        private void StructureChanged(object? sender, StructureChangedEventHandler.StructureChangedEventArgs e)
         {
             try
             {
@@ -123,7 +124,8 @@ namespace AccView
 
                 var isRoot = _uia.CompareElements(e.Sender, rootWindow);
 
-                await DispatcherQueue.EnqueueAsync(() =>
+                // DON'T await.
+                DispatcherQueue.EnqueueAsync(() =>
                 {
                     if (isRoot)
                     {
@@ -132,7 +134,7 @@ namespace AccView
                     LogOutput($"Structure changed: {e.ChangeType} on element: {ogName} ({ogLct}, {ogId}, {ogCt}, {ogRid})");
                 });
             }
-            catch (SystemException ex)
+            catch (COMException ex)
             {
                 // If lots of things are getting removed, we could still be
                 // processing an element that no longer exists. (??)
@@ -140,7 +142,7 @@ namespace AccView
                 if (ex.HResult == elementNotAvailableHr)
                 {
                     // TODO: better logging.
-                    await DispatcherQueue.EnqueueAsync(() =>
+                    DispatcherQueue.EnqueueAsync(() =>
                     {
                         LogOutput($"Structure changed event on element that is no longer available.");
                     });

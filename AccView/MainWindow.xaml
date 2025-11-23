@@ -32,7 +32,8 @@
             <ColumnDefinition Width="2*" /> <!-- Details -->
         </Grid.ColumnDefinitions>
 
-        <ScrollViewer x:Name="ElementsScrollViewer">
+        <ScrollViewer x:Name="ElementsScrollViewer"
+                      Grid.RowSpan="2">
             <StackPanel>
                 <TreeView x:Name="ElementsTreeView"
                           ItemsSource="{x:Bind AccessibilityTree}"
@@ -107,11 +108,12 @@
             HorizontalContentAlignment="Stretch"
             Margin="0,8,8,8">
             <Expander.Header>Log</Expander.Header>
-            <TextBox
-                x:Name="OutputTextBlock"
-                AcceptsReturn="True"
-                VerticalAlignment="Stretch"
-                HorizontalAlignment="Stretch" />
+            <Grid
+                Height="500">
+                <TextBox
+                    x:Name="OutputTextBlock"
+                    AcceptsReturn="True" />
+            </Grid>
         </Expander>
     </Grid>
 </winex:WindowEx>
