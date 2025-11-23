@@ -106,14 +106,21 @@
             Grid.Column="1"
             HorizontalAlignment="Stretch"
             HorizontalContentAlignment="Stretch"
-            Margin="0,8,8,8">
+            Margin="0,8,8,8"
+            MaxHeight="500">
             <Expander.Header>Log</Expander.Header>
-            <Grid
-                Height="500">
-                <TextBox
-                    x:Name="OutputTextBlock"
-                    AcceptsReturn="True" />
-            </Grid>
+            <ScrollViewer x:Name="OutputScrollViewer">
+                <ItemsRepeater ItemsSource="{x:Bind Logs}">
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="x:String">
+                            <TextBlock
+                                Text="{x:Bind}"
+                                TextWrapping="WrapWholeWords"
+                                Margin="4,0,0,0" />
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+            </ScrollViewer>
         </Expander>
     </Grid>
 </winex:WindowEx>

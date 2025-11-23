@@ -2,6 +2,7 @@ using AccView.ViewModels;
 using CommunityToolkit.Common.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.WinUI;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -55,6 +56,8 @@ namespace AccView
         private NotificationEventHandler _notificationEventHandler = new();
 
         private OverlayWindow? overlayWindow = null;
+
+        private ObservableCollection<string> Logs = new();
 
         public MainWindow(OverlayWindow? window)
         {
@@ -350,7 +353,9 @@ namespace AccView
             }
 
             OutputExpander.Header = message;
-            OutputTextBlock.Text += message + "\n";
+            Logs.Add(message);
+
+            OutputScrollViewer.ScrollToVerticalOffset(OutputScrollViewer.ExtentHeight);
         }
     }
 }
