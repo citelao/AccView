@@ -128,8 +128,14 @@ namespace AccView
                 var isRoot = _uia.CompareElements(e.Sender, rootWindow);
 
                 // DON'T await.
-                DispatcherQueue.EnqueueAsync(() =>
+                DispatcherQueue.EnqueueAsync(async () =>
                 {
+                    var vm = await avmFactory.GetOrCreateNormalized(e.Sender);
+                    if (vm.IsDescendant(windowUiaElement))
+                    {
+                        return;
+                    }
+
                     if (isRoot)
                     {
                         LogOutput("Structure changed event on root element");

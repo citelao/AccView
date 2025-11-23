@@ -230,6 +230,20 @@ namespace AccView.ViewModels
             return pattern.CachedIsAvailable(_element);
         }
 
+        public bool IsDescendant(AutomationElementViewModel possibleAncestor)
+        {
+            var current = Parent;
+            while (current != null)
+            {
+                if (current.IsElement(possibleAncestor))
+                {
+                    return true;
+                }
+                current = current.Parent;
+            }
+            return false;
+        }
+
         public bool IsInvokePatternAvailable => IsPatternAvailable(KnownPattern.All[UIA_PATTERN_ID.UIA_InvokePatternId]);
 
         // TODO: play with this.
