@@ -98,15 +98,11 @@ namespace AccView.ViewModels
         ];
 
         public static readonly List<UIA_PROPERTY_ID> DefaultCachedProperties = [
-            // name
             UIA_PROPERTY_ID.UIA_NamePropertyId,
-            // control type
+            UIA_PROPERTY_ID.UIA_AutomationIdPropertyId,
             UIA_PROPERTY_ID.UIA_ControlTypePropertyId,
-            // localized control type
             UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId,
-            // bounding rectangle
             UIA_PROPERTY_ID.UIA_BoundingRectanglePropertyId,
-            // runtime id
             UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId,
         ];
 
@@ -127,11 +123,7 @@ namespace AccView.ViewModels
 
             Parent = parent;
 
-            var cache = _uia.CreateCacheRequest();
-            foreach (var propertyId in DefaultCachedProperties)
-            {
-                cache.AddProperty(propertyId);
-            }
+            var cache = BuildDefaultCacheRequest(uia);
             _element = element.BuildUpdatedCache(cache);
 
             Name = (string)_element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId);
@@ -154,6 +146,16 @@ namespace AccView.ViewModels
         public static RuntimeIdT GetCurrentRuntimeId(IUIAutomationElement element)
         {
             return (RuntimeIdT)element.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
+        }
+
+        public static IUIAutomationCacheRequest BuildDefaultCacheRequest(IUIAutomation uia)
+        {
+            var cache = uia.CreateCacheRequest();
+            foreach (var propertyId in DefaultCachedProperties)
+            {
+                cache.AddProperty(propertyId);
+            }
+            return cache;
         }
 
         public bool IsElement(IUIAutomationElement element)
@@ -216,6 +218,11 @@ namespace AccView.ViewModels
             }
 
             _element = _element.BuildUpdatedCache(cache);
+        }
+
+        public override string ToString()
+        {
+            return $"{Name} ({LocalizedControlType})";
         }
 
         public bool IsPatternAvailable(KnownPattern pattern)

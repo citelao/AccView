@@ -11,6 +11,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using Shared;
+using Shared.UIA;
 using Shared.UIA.EventHandlers;
 using System;
 using System.Collections.Generic;
@@ -72,13 +73,7 @@ namespace AccView
             // https://learn.microsoft.com/en-us/windows/win32/api/uiautomationclient/nn-uiautomationclient-iuiautomationeventhandlergroup
             _uia.CreateEventHandlerGroup(out _eventHandlerGroup);
 
-            // TODO: standardize cache
-            var simpleInfoCacheRequest = _uia.CreateCacheRequest();
-            simpleInfoCacheRequest.AddProperty(UIA_PROPERTY_ID.UIA_NamePropertyId);
-            simpleInfoCacheRequest.AddProperty(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId);
-            simpleInfoCacheRequest.AddProperty(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId);
-            simpleInfoCacheRequest.AddProperty(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
-            simpleInfoCacheRequest.AddProperty(UIA_PROPERTY_ID.UIA_ControlTypePropertyId);
+            var simpleInfoCacheRequest = AutomationElementViewModel.BuildDefaultCacheRequest(_uia);
 
             _uia.AddFocusChangedEventHandler(simpleInfoCacheRequest, _focusChangedHandler);
 
@@ -91,7 +86,7 @@ namespace AccView
             // _eventHandlerGroup.AddTextEditTextChangedEventHandler(TreeScope.TreeScope_Descendants, )
 
             _uia.AddEventHandlerGroup(_uia.GetRootElement(), _eventHandlerGroup);
-
+                
             overlayWindow = window;
         }
 
@@ -118,22 +113,43 @@ namespace AccView
 
         private async void StructureChanged(object? sender, StructureChangedEventHandler.StructureChangedEventArgs e)
         {
-            var ogName = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId) as string;
-            var ogId = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId) as string;
-            var ogLct = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId) as string;
-            var ogCt = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId) as int?;
-            var ogRid = AutomationElementViewModel.GetCachedRuntimeId(e.Sender);
-
-            var isRoot = _uia.CompareElements(e.Sender, rootWindow);
-
-            await DispatcherQueue.EnqueueAsync(() =>
+            try
             {
-                if (isRoot)
+                var ogName = e.Sender.GetCachedPropertyValue<string>(UIA_PROPERTY_ID.UIA_NamePropertyId);
+                var ogId = e.Sender.GetCachedPropertyValue<string>(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId);
+                var ogLct = e.Sender.GetCachedPropertyValue<string>(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId);
+                var ogCt = e.Sender.GetCachedPropertyValue<int?>(UIA_PROPERTY_ID.UIA_ControlTypePropertyId);
+                var ogRid = AutomationElementViewModel.GetCachedRuntimeId(e.Sender);
+
+                var isRoot = _uia.CompareElements(e.Sender, rootWindow);
+
+                await DispatcherQueue.EnqueueAsync(() =>
                 {
-                    LogOutput("Structure changed event on root element");
+                    if (isRoot)
+                    {
+                        LogOutput("Structure changed event on root element");
+                    }
+                    LogOutput($"Structure changed: {e.ChangeType} on element: {ogName} ({ogLct}, {ogId}, {ogCt}, {ogRid})");
+                });
+            }
+            catch (SystemException ex)
+            {
+                // If lots of things are getting removed, we could still be
+                // processing an element that no longer exists. (??)
+                int elementNotAvailableHr = unchecked((int)0x80040201);
+                if (ex.HResult == elementNotAvailableHr)
+                {
+                    // TODO: better logging.
+                    await DispatcherQueue.EnqueueAsync(() =>
+                    {
+                        LogOutput($"Structure changed event on element that is no longer available.");
+                    });
                 }
-                LogOutput($"Structure changed: {e.ChangeType} on element: {ogName} ({ogLct}, {ogId}, {ogCt}, {ogRid})");
-            });
+                else
+                {
+                    throw;
+                }
+            }
         }
 
         private async void NotificationReceived(object? sender, NotificationEventHandler.NotificationEventArgs e)
