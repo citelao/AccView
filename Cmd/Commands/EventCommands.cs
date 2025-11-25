@@ -15,7 +15,7 @@ namespace Cmd.Commands
 
             var watcherThread = new Thread(() =>
             {
-                Console.WriteLine("Watching for focus changed events. Press Ctrl-C to exit.");
+                Console.WriteLine("Watching for events. Press Ctrl-C to exit.");
                 var uia = UIAHelpers.CreateUIAutomationInstance();
 
                 var cache = uia.CreateCacheRequest();
@@ -114,10 +114,10 @@ namespace Cmd.Commands
                 group.AddNotificationEventHandler(TreeScope.TreeScope_Descendants | TreeScope.TreeScope_Element, cache, notificationHandler);
 
                 var rootElement = uia.GetRootElement();
-                var rootName = rootElement.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId).As<string>() ?? string.Empty;
-                var rootAutomationId = rootElement.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId).As<string>() ?? string.Empty;
-                var rootControlType = rootElement.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId).As<UIA_CONTROLTYPE_ID>();
-                var rootLocalizedControlType = rootElement.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId).As<string>() ?? string.Empty;
+                var rootName = rootElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId).As<string>() ?? string.Empty;
+                var rootAutomationId = rootElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId).As<string>() ?? string.Empty;
+                var rootControlType = (UIA_CONTROLTYPE_ID)rootElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId).As<int>();
+                var rootLocalizedControlType = rootElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId).As<string>() ?? string.Empty;
                 Console.WriteLine(Dim($"Root Element: '{rootName}' ({rootLocalizedControlType} [{rootControlType}] - Id='{rootAutomationId}')"));
 
                 uia.AddEventHandlerGroup(rootElement, group);
