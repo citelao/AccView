@@ -140,7 +140,9 @@ namespace AccView.ViewModels
 
         public static RuntimeIdT GetCachedRuntimeId(IUIAutomationElement element)
         {
-            return element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId).As<RuntimeIdT>()!;
+            var rawValue = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
+            var type = rawValue.GetType();
+            return rawValue.As<RuntimeIdT>()!;
         }
 
         public static RuntimeIdT GetCurrentRuntimeId(IUIAutomationElement element)
