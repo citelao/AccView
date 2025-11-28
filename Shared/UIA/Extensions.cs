@@ -21,8 +21,8 @@ namespace Shared.UIA
         {
             try
             {
-                var variant = element.GetCachedPropertyValue(propertyId);
-                if (variant is T value)
+                var value = element.GetCachedPropertyValue(propertyId).As<T>();
+                if (value is not null)
                 {
                     return value;
                 }

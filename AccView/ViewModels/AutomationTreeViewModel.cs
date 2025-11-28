@@ -59,7 +59,7 @@ namespace AccView.ViewModels
                 var root = uia.GetRootElement();
                 var children = root.FindAllBuildCache(TreeScope.TreeScope_Children, TreeCondition, runtimeIdOnlyRequest);
                 var childrenVMs = new List<AutomationElementViewModel>();
-                for (int i = 0; i < children.Length; i++)
+                for (int i = 0; i < children.get_Length(); i++)
                 {
                     var element = children.GetElement(i);
                     var runtimeId = AutomationElementViewModel.GetCachedRuntimeId(element);
