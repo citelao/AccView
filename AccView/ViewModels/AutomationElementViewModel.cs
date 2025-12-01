@@ -144,23 +144,13 @@ namespace AccView.ViewModels
         public static RuntimeIdT GetCachedRuntimeId(IUIAutomationElement element)
         {
             var rawValue = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
-            unsafe
-            {
-                var pointer = rawValue.GetRawDataRef<nint>();
-                var safeArray = Marshal.PtrToStructure<SAFEARRAY>(pointer);
-                return SafeArrayHelpers.ToArray<int>(&safeArray);
-            }
+            return rawValue.AsArray<int>();
         }
 
         public static RuntimeIdT GetCurrentRuntimeId(IUIAutomationElement element)
         {
             var rawValue = element.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
-            unsafe
-            {
-                var pointer = rawValue.GetRawDataRef<nint>();
-                var safeArray = Marshal.PtrToStructure<SAFEARRAY>(pointer);
-                return SafeArrayHelpers.ToArray<int>(&safeArray);
-            }
+            return rawValue.AsArray<int>();
         }
 
         public static IUIAutomationCacheRequest BuildDefaultCacheRequest(IUIAutomation uia)

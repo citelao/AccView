@@ -31,5 +31,13 @@ namespace Shared
 
             return result;
         }
+
+        public static T[] ToArray<T>(SAFEARRAY safeArray) where T : unmanaged
+        {
+            unsafe
+            {
+                return ToArray<T>(&safeArray);
+            }
+        }
     }
 }
