@@ -22,20 +22,32 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore AccView.sln
 
-    - name: Build solution
-      run: dotnet build AccView.sln -c Release --no-restore
+    - name: Build Shared and test projects
+      run: |
+        dotnet build Shared/Shared.csproj -c Release --no-restore
+        dotnet build Shared.UnitTests/Shared.UnitTests.csproj -c Release --no-restore
+        dotnet build Cmd/Cmd.csproj -c Release --no-restore
 
     - name: Run tests
       run: dotnet test AccView.sln -c Release --no-build --verbosity normal
 
-    - name: Publish win-x64
-      run: dotnet publish AccView.sln -r win-x64 -c Release --no-restore -o publish/win-x64
+    - name: Publish AccView win-x64
+      run: dotnet publish AccView/AccView.csproj -r win-x64 -c Release --no-restore -o publish/win-x64/AccView
 
-    - name: Publish win-arm64
-      run: dotnet publish AccView.sln -r win-arm64 -c Release --no-restore -o publish/win-arm64
+    - name: Publish Cmd win-x64
+      run: dotnet publish Cmd/Cmd.csproj -r win-x64 -c Release --no-restore -o publish/win-x64/Cmd
 
-    - name: Publish win-x86
-      run: dotnet publish AccView.sln -r win-x86 -c Release --no-restore -o publish/win-x86
+    - name: Publish AccView win-arm64
+      run: dotnet publish AccView/AccView.csproj -r win-arm64 -c Release --no-restore -o publish/win-arm64/AccView
+
+    - name: Publish Cmd win-arm64
+      run: dotnet publish Cmd/Cmd.csproj -r win-arm64 -c Release --no-restore -o publish/win-arm64/Cmd
+
+    - name: Publish AccView win-x86
+      run: dotnet publish AccView/AccView.csproj -r win-x86 -c Release --no-restore -o publish/win-x86/AccView
+
+    - name: Publish Cmd win-x86
+      run: dotnet publish Cmd/Cmd.csproj -r win-x86 -c Release --no-restore -o publish/win-x86/Cmd
 
     - name: Create archives
       run: |
