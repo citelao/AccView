@@ -179,7 +179,7 @@ namespace AccView
             var ogName = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId).As<string>() ?? string.Empty;
             var ogId = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId).As<string>() ?? string.Empty;
             var ogLct = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId).As<string>() ?? string.Empty;
-            var ogCt = e.Sender.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId).As<UIA_CONTROLTYPE_ID>();
+            var ogCt = (UIA_CONTROLTYPE_ID)e.Sender.GetCachedPropertyValue<int>(UIA_PROPERTY_ID.UIA_ControlTypePropertyId);
             var ogRid = AutomationElementViewModel.GetCachedRuntimeId(e.Sender);
             await DispatcherQueue.EnqueueAsync(() =>
             {

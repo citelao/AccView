@@ -49,7 +49,7 @@ namespace Cmd.Commands
                     var element = e.Element;
                     var name = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId).As<string>();
                     var automationId = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId).As<string>() ?? string.Empty;
-                    var controlType = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId).As<UIA_CONTROLTYPE_ID>();
+                    var controlType = (UIA_CONTROLTYPE_ID)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId).As<int>();
                     var localizedControlType = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId).As<string>() ?? string.Empty;
 
                     // 09:54:12.123
@@ -67,7 +67,7 @@ namespace Cmd.Commands
 
                     var name = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId).As<string>() ?? string.Empty;
                     string automationId = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId).As<string>() ?? string.Empty;
-                    var controlType = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId).As<UIA_CONTROLTYPE_ID>();
+                    var controlType = (UIA_CONTROLTYPE_ID)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId).As<int>();
                     string localizedControlType = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId).As<string>() ?? string.Empty;
 
                     var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
@@ -103,7 +103,7 @@ namespace Cmd.Commands
 
                     var name = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId).As<string>() ?? string.Empty;
                     var automationId = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId).As<string>() ?? string.Empty;
-                    var controlType = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId).As<UIA_CONTROLTYPE_ID>();
+                    var controlType = (UIA_CONTROLTYPE_ID)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId).As<int>();
                     var localizedControlType = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId).As<string>() ?? string.Empty;
 
                     var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
