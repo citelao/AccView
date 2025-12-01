@@ -17,14 +17,12 @@ jobs:
       with:
         dotnet-version: '9.0.x'
 
-    - name: Restore dependencies
-      run: dotnet restore AccView.sln
-
-    - name: Build Shared and test projects
+    - name: Restore and build Shared and test projects
       run: |
+        dotnet restore Shared/Shared.csproj
         dotnet build Shared/Shared.csproj -c Release --no-restore
+        dotnet restore Shared.UnitTests/Shared.UnitTests.csproj
         dotnet build Shared.UnitTests/Shared.UnitTests.csproj -c Release --no-restore
-        dotnet build Cmd/Cmd.csproj -c Release --no-restore
 
     - name: Run tests
       run: dotnet test AccView.sln -c Release --no-build --verbosity normal
