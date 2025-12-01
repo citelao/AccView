@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices.Marshalling;
 using System.Runtime.Versioning;
 using Windows.Win32;
+using Windows.Win32.System.Com;
 using Windows.Win32.UI.Accessibility;
 
 namespace Shared
@@ -35,6 +36,14 @@ namespace Shared
         public static IUIAutomation5 CreateUIAutomation5Instance()
         {
             return CreateInstance<IUIAutomation5>(typeof(CUIAutomation));
+        }
+
+        public unsafe static int[] SafeArrayToNativeArray(IUIAutomation uia, SAFEARRAY* safeArray)
+        {
+            // TODO: what are lifetimes here?
+            //uia.IntSafeArrayToNativeArray(safeArray, out int[]? nativeArray);
+            //PInvokeAcc.IntSafeArrayToNativeArray();
+            throw new NotImplementedException();
         }
     }
 }

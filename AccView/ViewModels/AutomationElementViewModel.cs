@@ -7,7 +7,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Windows.Win32;
+using Windows.Win32.System.Com;
 using Windows.Win32.UI.Accessibility;
 
 namespace AccView.ViewModels
@@ -141,8 +144,35 @@ namespace AccView.ViewModels
         public static RuntimeIdT GetCachedRuntimeId(IUIAutomationElement element)
         {
             var rawValue = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
-            var type = rawValue.GetType();
-            return rawValue.As<RuntimeIdT>()!;
+            unsafe
+            {
+                var pointer = rawValue.GetRawDataRef<nint>();
+                var safeArray = Marshal.PtrToStructure<SAFEARRAY>(pointer);
+                PInvokeAcc.SafeArrayGetLBound(&safeArray, 1, out int lbound).ThrowOnFailure();
+                PInvokeAcc.SafeArrayGetUBound(&safeArray, 1, out int ubound).ThrowOnFailure();
+
+                var count = ubound - lbound + 1;
+                var result = new int[count];
+                for (int i = lbound; i <= ubound; i++)
+                {
+                    int value;
+                    PInvokeAcc.SafeArrayGetElement(&safeArray, i, &value).ThrowOnFailure();
+                    result[i - lbound] = value;
+                }
+
+                //var count = safeArray.cDims;
+                //var result = new int[count];
+                //var dataPtr = (int*)safeArray.pvData;
+                //for (int i = 0; i < count; i++)
+                //{
+                //    result[i] = dataPtr[i];
+                //}
+                return result;
+            }
+            //var type = rawValue.GetType();
+            //var rawData = rawValue.GetRawDataRef<byte>();
+            //return rawValue.As<RuntimeIdT>()!;
+            //return rawValue.As<int[]>();
         }
 
         public static RuntimeIdT GetCurrentRuntimeId(IUIAutomationElement element)

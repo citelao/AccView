@@ -12,3 +12,7 @@ IUIAutomationValuePattern
 IUIAutomationFocusChangedEventHandler
 
 GetCursorPos
+
+SafeArrayGetElement
+SafeArrayGetLBound
+SafeArrayGetUBound
