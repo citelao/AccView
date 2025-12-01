@@ -37,13 +37,5 @@ namespace Shared
         {
             return CreateInstance<IUIAutomation5>(typeof(CUIAutomation));
         }
-
-        public unsafe static int[] SafeArrayToNativeArray(IUIAutomation uia, SAFEARRAY* safeArray)
-        {
-            // TODO: what are lifetimes here?
-            //uia.IntSafeArrayToNativeArray(safeArray, out int[]? nativeArray);
-            //PInvokeAcc.IntSafeArrayToNativeArray();
-            throw new NotImplementedException();
-        }
     }
 }

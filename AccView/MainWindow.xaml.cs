@@ -123,7 +123,7 @@ namespace AccView
                 var ogName = e.Sender.GetCachedPropertyValue<string>(UIA_PROPERTY_ID.UIA_NamePropertyId);
                 var ogId = e.Sender.GetCachedPropertyValue<string>(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId);
                 var ogLct = e.Sender.GetCachedPropertyValue<string>(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId);
-                var ogCt = e.Sender.GetCachedPropertyValue<UIA_CONTROLTYPE_ID?>(UIA_PROPERTY_ID.UIA_ControlTypePropertyId);
+                var ogCt = (UIA_CONTROLTYPE_ID)e.Sender.GetCachedPropertyValue<int>(UIA_PROPERTY_ID.UIA_ControlTypePropertyId);
                 var ogRid = AutomationElementViewModel.GetCachedRuntimeId(e.Sender);
 
                 var isRoot = _uia.CompareElements(e.Sender, rootWindow);
