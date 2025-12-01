@@ -1,0 +1,73 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ main, dev ]
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore AccView.sln
+
+    - name: Build solution
+      run: dotnet build AccView.sln -c Release --no-restore
+
+    - name: Run tests
+      run: dotnet test AccView.sln -c Release --no-build --verbosity normal
+
+    - name: Publish win-x64
+      run: dotnet publish AccView.sln -r win-x64 -c Release --no-restore -o publish/win-x64
+
+    - name: Publish win-arm64
+      run: dotnet publish AccView.sln -r win-arm64 -c Release --no-restore -o publish/win-arm64
+
+    - name: Publish win-x86
+      run: dotnet publish AccView.sln -r win-x86 -c Release --no-restore -o publish/win-x86
+
+    - name: Create archives
+      run: |
+        Compress-Archive -Path publish/win-x64/* -DestinationPath AccView-win-x64.zip
+        Compress-Archive -Path publish/win-arm64/* -DestinationPath AccView-win-arm64.zip
+        Compress-Archive -Path publish/win-x86/* -DestinationPath AccView-win-x86.zip
+
+    - name: Generate version tag
+      id: version
+      run: |
+        $branch = "${{ github.ref_name }}"
+        $shortSha = "${{ github.sha }}".Substring(0, 7)
+        $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+        $tag = "$branch-$timestamp-$shortSha"
+        echo "tag=$tag" >> $env:GITHUB_OUTPUT
+        echo "release_name=Build $branch @ $timestamp ($shortSha)" >> $env:GITHUB_OUTPUT
+
+    - name: Create draft release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ steps.version.outputs.tag }}
+        name: ${{ steps.version.outputs.release_name }}
+        draft: true
+        prerelease: ${{ github.ref_name == 'dev' }}
+        files: |
+          AccView-win-x64.zip
+          AccView-win-arm64.zip
+          AccView-win-x86.zip
+        body: |
+          Automated build from ${{ github.ref_name }} branch
+          
+          Commit: ${{ github.sha }}
+          Author: ${{ github.actor }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

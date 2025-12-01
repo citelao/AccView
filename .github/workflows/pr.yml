@@ -1,0 +1,37 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore AccView.sln
+
+    - name: Build solution
+      run: dotnet build AccView.sln -c Release --no-restore
+
+    - name: Run tests
+      run: dotnet test AccView.sln -c Release --no-build --verbosity normal
+
+    - name: Publish win-x64
+      run: dotnet publish AccView.sln -r win-x64 -c Release --no-restore -o publish/win-x64
+
+    - name: Upload win-x64 artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: AccView-win-x64
+        path: publish/win-x64/
+        retention-days: 7
