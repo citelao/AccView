@@ -1,9 +1,11 @@
+using System.Runtime.InteropServices.Marshalling;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.Accessibility;
 
 namespace Shared.UIA.EventHandlers;
 
-public class NotificationEventHandler : IUIAutomationNotificationEventHandler
+[GeneratedComClass]
+public partial class NotificationEventHandler : IUIAutomationNotificationEventHandler
 {
     public struct NotificationEventArgs
     {

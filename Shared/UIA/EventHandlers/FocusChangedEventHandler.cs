@@ -1,8 +1,10 @@
-﻿using Windows.Win32.UI.Accessibility;
+﻿using System.Runtime.InteropServices.Marshalling;
+using Windows.Win32.UI.Accessibility;
 
 namespace Shared.UIA.EventHandlers;
 
-public class FocusChangedEventHandler : IUIAutomationFocusChangedEventHandler
+[GeneratedComClass]
+public partial class FocusChangedEventHandler : IUIAutomationFocusChangedEventHandler
 {
     public class FocusChangedEventArgs : EventArgs
     {

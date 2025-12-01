@@ -15,7 +15,7 @@ namespace Cmd.Commands
 
             var watcherThread = new Thread(() =>
             {
-                Console.WriteLine("Watching for focus changed events. Press Ctrl-C to exit.");
+                Console.WriteLine("Watching for events. Press Ctrl-C to exit.");
                 var uia = UIAHelpers.CreateUIAutomationInstance();
 
                 var cache = uia.CreateCacheRequest();
@@ -47,10 +47,10 @@ namespace Cmd.Commands
                 focusHandler.FocusChanged += (sender, e) =>
                 {
                     var element = e.Element;
-                    var name = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId);
-                    var automationId = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId);
-                    var controlType = (UIA_CONTROLTYPE_ID)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId);
-                    var localizedControlType = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId);
+                    var name = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId).As<string>();
+                    var automationId = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId).As<string>() ?? string.Empty;
+                    var controlType = (UIA_CONTROLTYPE_ID)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId).As<int>();
+                    var localizedControlType = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId).As<string>() ?? string.Empty;
 
                     // 09:54:12.123
                     var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
@@ -65,10 +65,10 @@ namespace Cmd.Commands
                     var element = e.Sender;
                     var changeType = e.ChangeType;
 
-                    var name = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId);
-                    var automationId = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId);
-                    var controlType = (UIA_CONTROLTYPE_ID)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId);
-                    var localizedControlType = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId);
+                    var name = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId).As<string>() ?? string.Empty;
+                    string automationId = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId).As<string>() ?? string.Empty;
+                    var controlType = (UIA_CONTROLTYPE_ID)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId).As<int>();
+                    string localizedControlType = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId).As<string>() ?? string.Empty;
 
                     var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
                     Console.WriteLine($"{Dim(timestamp)} {Dim(Yellow("[StructureChanged]"))} {Green($"'{name}'")} {Dim($"({Green(localizedControlType)} [{controlType}] - Id='{Blue(automationId)}')")} ChangeType={Yellow(changeType.ToString())}");
@@ -101,10 +101,10 @@ namespace Cmd.Commands
                     //    }
                     //}
 
-                    var name = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId);
-                    var automationId = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId);
-                    var controlType = (UIA_CONTROLTYPE_ID)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId);
-                    var localizedControlType = (string)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId);
+                    var name = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId).As<string>() ?? string.Empty;
+                    var automationId = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId).As<string>() ?? string.Empty;
+                    var controlType = (UIA_CONTROLTYPE_ID)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId).As<int>();
+                    var localizedControlType = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId).As<string>() ?? string.Empty;
 
                     var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
                     // Console.WriteLine($"{Dim(timestamp)} {Dim(Magenta("[Notification]"))} {Green($"'{name}'")} {Dim($"({Green(localizedControlType)} [{controlType}] - Id='{Blue(automationId)}')")} Kind={Magenta(e.NotificationKind.ToString())} Processing={Magenta(e.NotificationProcessing.ToString())} Message='{e.DisplayString}'");
@@ -114,10 +114,10 @@ namespace Cmd.Commands
                 group.AddNotificationEventHandler(TreeScope.TreeScope_Descendants | TreeScope.TreeScope_Element, cache, notificationHandler);
 
                 var rootElement = uia.GetRootElement();
-                var rootName = (string)rootElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId);
-                var rootAutomationId = (string)rootElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId);
-                var rootControlType = (UIA_CONTROLTYPE_ID)rootElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId);
-                var rootLocalizedControlType = (string)rootElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId);
+                var rootName = rootElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId).As<string>() ?? string.Empty;
+                var rootAutomationId = rootElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_AutomationIdPropertyId).As<string>() ?? string.Empty;
+                var rootControlType = (UIA_CONTROLTYPE_ID)rootElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_ControlTypePropertyId).As<int>();
+                var rootLocalizedControlType = rootElement.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId).As<string>() ?? string.Empty;
                 Console.WriteLine(Dim($"Root Element: '{rootName}' ({rootLocalizedControlType} [{rootControlType}] - Id='{rootAutomationId}')"));
 
                 uia.AddEventHandlerGroup(rootElement, group);

@@ -7,7 +7,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Windows.Win32;
+using Windows.Win32.System.Com;
 using Windows.Win32.UI.Accessibility;
 
 namespace AccView.ViewModels
@@ -31,10 +34,10 @@ namespace AccView.ViewModels
         public partial RuntimeIdT RuntimeId { get; private set; }
         public string RuntimeIdString => $"[{string.Join(",", RuntimeId)}]";
 
-        public UIA_CONTROLTYPE_ID ControlType => _element.CachedControlType;
-        public bool HasKeyboardFocus => _element.CachedHasKeyboardFocus;
-        public bool IsEnabled => _element.CachedIsEnabled;
-        public bool IsOffscreen => _element.CachedIsOffscreen;
+        public UIA_CONTROLTYPE_ID ControlType => _element.get_CachedControlType();
+        public bool HasKeyboardFocus => _element.get_CachedHasKeyboardFocus();
+        public bool IsEnabled => _element.get_CachedIsEnabled();
+        public bool IsOffscreen => _element.get_CachedIsOffscreen();
 
         // Must be requested!
         [ObservableProperty]
@@ -126,10 +129,10 @@ namespace AccView.ViewModels
             var cache = BuildDefaultCacheRequest(uia);
             _element = element.BuildUpdatedCache(cache);
 
-            Name = (string)_element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId);
-            LocalizedControlType = (string)_element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId);
+            Name = _element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_NamePropertyId).As<string>() ?? string.Empty;
+            LocalizedControlType = _element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_LocalizedControlTypePropertyId).As<string>() ?? string.Empty;
 
-            var rect = _element.CachedBoundingRectangle;
+            var rect = _element.get_CachedBoundingRectangle();
             BoundingRect = new Rectangle(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
 
             var runtimeIdObj = GetCachedRuntimeId(element);
@@ -140,12 +143,14 @@ namespace AccView.ViewModels
 
         public static RuntimeIdT GetCachedRuntimeId(IUIAutomationElement element)
         {
-            return (RuntimeIdT)element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
+            var rawValue = element.GetCachedPropertyValue(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
+            return rawValue.AsArray<int>();
         }
 
         public static RuntimeIdT GetCurrentRuntimeId(IUIAutomationElement element)
         {
-            return (RuntimeIdT)element.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
+            var rawValue = element.GetCurrentPropertyValue(UIA_PROPERTY_ID.UIA_RuntimeIdPropertyId);
+            return rawValue.AsArray<int>();
         }
 
         public static IUIAutomationCacheRequest BuildDefaultCacheRequest(IUIAutomation uia)
@@ -182,7 +187,7 @@ namespace AccView.ViewModels
 
             var children = _element.FindAll(TreeScope.TreeScope_Children, _factory.TreeCondition);
             var childVMs = new List<AutomationElementViewModel>();
-            for (int i = 0; i < children.Length; i++)
+            for (int i = 0; i < children.get_Length(); i++)
             {
                 var childElement = children.GetElement(i);
                 var childViewModel = await _factory.GetOrCreateNormalizedWithKnownParent(childElement, parent: this);

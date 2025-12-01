@@ -1,5 +1,8 @@
-﻿using System.Runtime.Versioning;
+﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.Marshalling;
+using System.Runtime.Versioning;
 using Windows.Win32;
+using Windows.Win32.System.Com;
 using Windows.Win32.UI.Accessibility;
 
 namespace Shared
