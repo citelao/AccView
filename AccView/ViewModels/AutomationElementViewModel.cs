@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Windows.Win32;
 using Windows.Win32.System.Com;
 using Windows.Win32.UI.Accessibility;
+using Shared.UIA;
 
 namespace AccView.ViewModels
 {
@@ -57,48 +58,6 @@ namespace AccView.ViewModels
         [NotifyPropertyChangedFor(nameof(IsOffscreen))]
         [NotifyPropertyChangedFor(nameof(IsInvokePatternAvailable))]
         private partial IUIAutomationElement _element { get; set; }
-
-        /// <summary>
-        /// Properties for checking pattern availability
-        /// https://learn.microsoft.com/en-us/windows/win32/winauto/uiauto-control-pattern-availability-propids
-        /// </summary>
-        public static readonly List<UIA_PROPERTY_ID> AvaiblePatternProperties = [
-            UIA_PROPERTY_ID.UIA_IsDockPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsExpandCollapsePatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsGridItemPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsGridPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsInvokePatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsMultipleViewPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsRangeValuePatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsScrollPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsScrollItemPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsSelectionItemPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsSelectionPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsTablePatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsTableItemPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsTextPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsTogglePatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsTransformPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsValuePatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsWindowPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsLegacyIAccessiblePatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsItemContainerPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsVirtualizedItemPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsSynchronizedInputPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsObjectModelPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsAnnotationPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsTextPattern2AvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsStylesPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsSpreadsheetPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsSpreadsheetItemPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsTransformPattern2AvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsTextChildPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsDragPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsDropTargetPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsTextEditPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsCustomNavigationPatternAvailablePropertyId,
-            UIA_PROPERTY_ID.UIA_IsSelectionPattern2AvailablePropertyId,
-        ];
 
         public static readonly List<UIA_PROPERTY_ID> DefaultCachedProperties = [
             UIA_PROPERTY_ID.UIA_NamePropertyId,
@@ -204,10 +163,6 @@ namespace AccView.ViewModels
         public void LoadDetailedProperties()
         {
             var cache = _uia.CreateCacheRequest();
-            foreach (var propertyId in AvaiblePatternProperties)
-            {
-                cache.AddProperty(propertyId);
-            }
             foreach (var knownPattern in KnownPattern.All.Values)
             {
                 cache.AddProperty(knownPattern.IsAvailableId);
@@ -232,7 +187,8 @@ namespace AccView.ViewModels
 
         public bool IsPatternAvailable(KnownPattern pattern)
         {
-            return pattern.CachedIsAvailable(_element);
+            _uia.PollForPotentialSupportedPatternsSafe(_element, out var patternIds, out var patternNames);
+            return Array.Exists(patternIds, id => id == pattern.PatternId);
         }
 
         public bool IsDescendant(AutomationElementViewModel possibleAncestor)

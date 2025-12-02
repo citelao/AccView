@@ -16,3 +16,4 @@ GetCursorPos
 SafeArrayGetElement
 SafeArrayGetLBound
 SafeArrayGetUBound
+SafeArrayDestroy

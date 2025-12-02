@@ -3,7 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using Windows.Win32.System.Com;
+using Windows.Win32;
 using Windows.Win32.UI.Accessibility;
+using Windows.Win32.Foundation;
+using System.Runtime.InteropServices;
 
 namespace Shared.UIA
 {
@@ -32,6 +37,24 @@ namespace Shared.UIA
                 throw new ArgumentException($"{propertyId} is not cached", ex);
             }
             throw new InvalidCastException($"Failed to cast property {propertyId} value to type {typeof(T)}.");
+        }
+
+        public unsafe static void PollForPotentialSupportedPatternsSafe(this IUIAutomation uia, IUIAutomationElement element, out UIA_PATTERN_ID[] patternIds, out string[] patternNames)
+        {
+            uia.PollForPotentialSupportedPatterns(element, out SAFEARRAY* patternIdsSafeArray, out SAFEARRAY* patternNamesSafeArray);
+            try
+            {
+                var patternIdInts = SafeArrayHelpers.ToArray<int>(patternIdsSafeArray);
+                patternIds = patternIdInts.Select(id => (UIA_PATTERN_ID)id).ToArray();
+
+                var patternNamesBstr = SafeArrayHelpers.ToArray<BSTR>(patternNamesSafeArray);
+                patternNames = patternNamesBstr.Select(bstr => Marshal.PtrToStringBSTR(bstr)).ToArray();
+            }
+            finally
+            {
+                PInvokeAcc.SafeArrayDestroy(patternIdsSafeArray);
+                PInvokeAcc.SafeArrayDestroy(patternNamesSafeArray);
+            }
         }
     }
 }
