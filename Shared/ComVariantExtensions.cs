@@ -45,7 +45,7 @@ namespace Shared
 
         private static VarEnum GetSafeArrayType(ComVariant comVariant)
         {
-            var remainder = comVariant.VarType ^ VarEnum.VT_ARRAY;
+            var remainder = comVariant.VarType & ~VarEnum.VT_ARRAY;
             return remainder;
         }
 
@@ -53,7 +53,7 @@ namespace Shared
         {
             if (!acceptable.Contains(varEnum))
             {
-                throw new InvalidCastException($"ComVariant is not of expected VarEnum type(s): {string.Join(", ", acceptable)}");
+                throw new InvalidCastException($"ComVariant {varEnum} is not of expected VarEnum type(s): {string.Join(", ", acceptable)}");
             }
         }
     }

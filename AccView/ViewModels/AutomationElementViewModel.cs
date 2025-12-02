@@ -187,6 +187,7 @@ namespace AccView.ViewModels
 
         public bool IsPatternAvailable(KnownPattern pattern)
         {
+            // TODO: cache
             _uia.PollForPotentialSupportedPatternsSafe(_element, out var patternIds, out var patternNames);
             return Array.Exists(patternIds, id => id == pattern.PatternId);
         }
