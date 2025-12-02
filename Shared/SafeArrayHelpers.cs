@@ -20,6 +20,13 @@ namespace Shared
             PInvokeAcc.SafeArrayGetLBound(safeArray, 1, out int lbound).ThrowOnFailure();
             PInvokeAcc.SafeArrayGetUBound(safeArray, 1, out int ubound).ThrowOnFailure();
 
+            // How many bytes per element? Does this match T?
+            var elemSize = PInvokeAcc.SafeArrayGetElemsize(safeArray);
+            if (elemSize != sizeof(T))
+            {
+                throw new InvalidCastException($"SAFEARRAY element size {elemSize} does not match type size {sizeof(T)} for type {typeof(T)}.");
+            }
+
             var count = ubound - lbound + 1;
             var result = new T[count];
             for (int i = lbound; i <= ubound; i++)

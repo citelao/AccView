@@ -157,7 +157,7 @@ namespace AccView.ViewModels
                 var isRoot = uia.CompareElements(uia.GetRootElement(), rootUiaElement);
                 if (!isRoot)
                 {
-                    throw new InvalidOperationException("Could not find root element.");
+                    throw new InvalidOperationException($"Could not find root element ({AutomationElementViewModel.GetElementDebugString(rootUiaElement)})");
                 }
 
                 // Now walk down the tree to find the corresponding view model.

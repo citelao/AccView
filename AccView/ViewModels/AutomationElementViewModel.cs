@@ -180,6 +180,15 @@ namespace AccView.ViewModels
             _element = _element.BuildUpdatedCache(cache);
         }
 
+        public static string GetElementDebugString(IUIAutomationElement element)
+        {
+            var name = element.get_CurrentName();
+            var controlTypeId = element.get_CurrentControlType();
+            var lct = element.get_CurrentLocalizedControlType();
+            var runtimeID = GetCurrentRuntimeId(element);
+            return $"{name} ({lct}) [ControlType={controlTypeId}, RuntimeId=[{string.Join(",", runtimeID)}]]";
+        }
+
         public override string ToString()
         {
             return $"{Name} ({LocalizedControlType})";
