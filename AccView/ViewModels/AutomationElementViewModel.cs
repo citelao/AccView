@@ -45,6 +45,9 @@ namespace AccView.ViewModels
         public partial ObservableCollection<AutomationElementViewModel> Children { get; private set; } = [];
 
         [ObservableProperty]
+        public partial bool IsLoadingChildren { get; private set; } = false;
+
+        [ObservableProperty]
         public partial AutomationElementViewModel? Parent { get; private set; } = null;
 
         private readonly IUIAutomation _uia;
@@ -144,20 +147,35 @@ namespace AccView.ViewModels
             //    throw new Exception("LoadChildren must be called on the UI thread.");
             //}
 
-            var children = _element.FindAll(TreeScope.TreeScope_Children, _factory.TreeCondition);
-            var childVMs = new List<AutomationElementViewModel>();
-            for (int i = 0; i < children.get_Length(); i++)
-            {
-                var childElement = children.GetElement(i);
-                var childViewModel = await _factory.GetOrCreateNormalizedWithKnownParent(childElement, parent: this);
-                childVMs.Add(childViewModel);
-            }
-
-            // TODO: I don't like jumping between the UI thread.
             await _dispatcherQueue.EnqueueAsync(() =>
             {
-                MergeChildren(Children, childVMs);
+                IsLoadingChildren = true;
             });
+
+            try
+            {
+                var children = _element.FindAll(TreeScope.TreeScope_Children, _factory.TreeCondition);
+                var childVMs = new List<AutomationElementViewModel>();
+                for (int i = 0; i < children.get_Length(); i++)
+                {
+                    var childElement = children.GetElement(i);
+                    var childViewModel = await _factory.GetOrCreateNormalizedWithKnownParent(childElement, parent: this);
+                    childVMs.Add(childViewModel);
+                }
+
+                // TODO: I don't like jumping between the UI thread.
+                await _dispatcherQueue.EnqueueAsync(() =>
+                {
+                    MergeChildren(Children, childVMs);
+                });
+            }
+            finally
+            {
+                await _dispatcherQueue.EnqueueAsync(() =>
+                {
+                    IsLoadingChildren = false;
+                });
+            }
         }
 
         public void LoadDetailedProperties()

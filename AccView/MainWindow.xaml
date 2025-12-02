@@ -51,6 +51,7 @@
                                 <StackPanel Orientation="Horizontal" Spacing="4">
                                     <TextBlock Text="{x:Bind LocalizedControlType, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                     <TextBlock Text="{x:Bind Name, Mode=OneWay}" />
+                                    <ProgressRing IsActive="{x:Bind IsLoadingChildren, Mode=OneWay}" Height="6" Width="6" />
                                 </StackPanel>
                             </TreeViewItem>
                         </DataTemplate>
